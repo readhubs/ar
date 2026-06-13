@@ -57,7 +57,7 @@ jobs:
         run: |
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config user.name "github-actions[bot]"
-          git add courses/ courses-data.js sitemap.xml || true
+          git add courses/ courses-data.js sitemap.xml .nojekyll || true
           if git diff --staged --quiet; then
             echo "Nothing new to commit."
           else
