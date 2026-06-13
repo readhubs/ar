@@ -1,25 +1,47 @@
-=== Readhubs GitHub Pages - ملفات الإعداد الأساسية ===
+=== تعليمات رفع الملفات على GitHub Pages ===
 
-رفع هذه الملفات على مستودع GitHub Pages (readhubs.github.io/ar):
+هذا الملف ZIP يحتوي على مجلدين رئيسيين:
 
-الهيكل:
-  index.html          → الصفحة الرئيسية
-  style.css           → نظام التصميم الكامل
-  courses-data.js     → بيانات الكورسات (تحديث يدوي بعد كل كورس)
-  config.js           → التحكم في ظهور المقالات
-  update-visibility.js → سكريبت تفعيل المقالات (node update-visibility.js)
-  sitemap.xml         → خريطة الموقع
-  robots.txt          → توجيهات محركات البحث
-  about/index.html    → صفحة "من نحن"
-  deals/index.html    → صفحة العروض والكوبونات
-  niches/             → 5 صفحات الفئات (money, communication, mental-health, productivity, career)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+الجزء الأول: repo-base-files/ (ملفات إعداد الموقع - مرة واحدة فقط)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-الخطوات التالية:
-1. ارفع هذه الملفات على GitHub في مستودع readhubs.github.io/ar
-2. شغّل الأداة مع ملف كورس .txt للحصول على محتوى الكورس
-3. ارفع مجلد courses/<slug>/ الناتج على نفس المستودع
-4. عدّل courses-data.js بإضافة بيانات الكورس الجديد
+ارفع هذه الملفات مباشرة إلى الجذر (root) في مستودع readhubs.github.io/ar:
 
-لاحقاً لتفعيل SEO:
-  عدّل config.js وشغّل: node update-visibility.js
-  ثم: git add . && git commit -m "تفعيل مقالات" && git push
+  repo-base-files/
+  ├── index.html          → رفع إلى: /index.html
+  ├── style.css           → رفع إلى: /style.css
+  ├── courses-data.js     → رفع إلى: /courses-data.js
+  ├── config.js           → رفع إلى: /config.js
+  ├── update-visibility.js → رفع إلى: /update-visibility.js
+  ├── sitemap.xml         → رفع إلى: /sitemap.xml
+  ├── robots.txt          → رفع إلى: /robots.txt
+  ├── about/              → رفع إلى: /about/
+  ├── deals/              → رفع إلى: /deals/
+  └── niches/             → رفع إلى: /niches/
+
+⚠️ هذه الخطوة مرة واحدة فقط عند إعداد الموقع لأول مرة.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+الجزء الثاني: ملفات الكورس (لكل كورس جديد)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  courses/skills-aliqnaa-waltathyr-fy-alakhryn-guide-amly-lltathyr-on-alnas/         → رفع إلى: /courses/skills-aliqnaa-waltathyr-fy-alakhryn-guide-amly-lltathyr-on-alnas/
+  course-entry-snippet.js  → أضف محتواه يدوياً إلى courses-data.js في GitHub
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+الجزء الثالث: ملفات PPTX
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  pptx/*.pptx  → احتفظ بها على جهازك أو Google Drive
+                (لا ترفعها على GitHub - حجمها كبير)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+تفعيل المقالات لاحقاً (SEO)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. عدّل /config.js: أضف سطر مثل:  "skills-aliqnaa-waltathyr-fy-alakhryn-guide-amly-lltathyr-on-alnas": 50
+2. شغّل:  node update-visibility.js
+3. ادفع التغييرات إلى GitHub
+
+الدعم: راجع ملف course-entry-snippet.js لبيانات الكورس.

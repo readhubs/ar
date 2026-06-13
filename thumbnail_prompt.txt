@@ -1,0 +1,48 @@
+# انسخ هذا البرومبت وأرسله إلى Nanobanana مع الصورة
+# (Copy this prompt and send it to Nanobanana along with the image)
+
+---
+
+Create a YouTube/Udemy course thumbnail image with the following STRICT specifications:
+
+**DIMENSIONS:** 750x422px (16:9 ratio)
+
+**ABSOLUTE RESTRICTIONS - NO EXCEPTIONS:**
+- NO text, letters, numbers, or any written characters anywhere in the image
+- NO faces, people's faces, or recognizable portraits
+- NO stock photo look or generic imagery
+- NO generic business/corporate imagery
+
+**COLOR PALETTE - MANDATORY:**
+- Primary background: Navy blue #0F1B2D (deep, professional)
+- Accent color: Gold/amber #C9A84C (warm, premium)
+- Secondary: White #FFFFFF for highlights only
+- NO other colors unless they are very close to these
+
+**COMPOSITION RULES:**
+- Keep the RIGHT 40% of the image simple, uncluttered, and low-detail (this area will have text overlaid)
+- Main visual elements concentrated in the LEFT 60% of the image
+- Strong visual hierarchy with a clear focal point
+- Professional, premium aesthetic — NOT flat design, NOT minimalist
+
+**TOPIC CATEGORY: COMMUNICATION/RELATIONSHIPS**
+
+**VISUAL ELEMENTS FOR COMMUNICATION/RELATIONSHIPS:**
+- Abstract network nodes connected by golden lines
+- Flowing curves suggesting dialogue and connection
+- Interlocking geometric shapes representing harmony
+- Light waves or sound wave patterns in gold
+
+**STYLE REQUIREMENTS:**
+- Cinematic, premium quality
+- Depth and dimension (not flat)
+- Subtle gradients allowed
+- Gold elements should glow or shine slightly
+- Overall mood: aspirational, professional, trustworthy
+
+**CONTEXT:**
+Course title (for reference, do NOT include in image): مهارات الإقناع والتأثير في الآخرين - دليل عملي للتأثير على الناس
+Keywords: إقناع، تأثير، مهارات تواصل، لغة جسد، قيادة
+
+---
+الفئة المكتشفة تلقائياً: COMMUNICATION/RELATIONSHIPS
