@@ -550,7 +550,7 @@ function buildLandingPage(course, slug, articles) {
     '  </header>\n' +
     '  <main class="course-landing">\n' +
     '    <div class="course-hero">\n' +
-    '      <img src="thumbnail.jpg" alt="' + title + '" class="course-thumbnail" onerror="this.style.display='none'">\n' +
+    '      <img src="thumbnail.jpg" alt="' + title + '" class="course-thumbnail" onerror="this.style.display=\'none\'">\n' +
     '      <h1>' + title + '</h1>\n' +
     '      <p class="course-description">' + udemyData.description + '</p>\n' +
     '      <a href="#" class="udemy-cta" id="udemy-link" target="_blank" rel="noopener">🎓 اشترِ الكورس الآن على Udemy</a>\n' +
