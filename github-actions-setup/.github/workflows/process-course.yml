@@ -1,0 +1,69 @@
+name: Generate Course Content
+
+on:
+  push:
+    paths:
+      - '_courses/*.txt'
+  workflow_dispatch:
+    inputs:
+      course_file:
+        description: 'Filename in _courses/ (e.g. my-course.txt). Leave blank to process all.'
+        required: false
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        working-directory: _scripts
+        run: npm install --no-fund --no-audit
+
+      - name: Find course files to process
+        id: find
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ github.event.inputs.course_file }}" ]; then
+            echo "files=_courses/${{ github.event.inputs.course_file }}" >> "$GITHUB_OUTPUT"
+          else
+            CHANGED=$(git diff --name-only HEAD~1 HEAD -- '_courses/' 2>/dev/null | grep '\.txt$' || true)
+            if [ -z "$CHANGED" ]; then
+              CHANGED=$(ls _courses/*.txt 2>/dev/null || true)
+            fi
+            echo "files=$CHANGED" >> "$GITHUB_OUTPUT"
+          fi
+          echo "Found: $(cat $GITHUB_OUTPUT | grep files=)"
+
+      - name: Generate course content
+        if: steps.find.outputs.files != ''
+        run: |
+          for FILE in ${{ steps.find.outputs.files }}; do
+            if [ -f "$FILE" ]; then
+              echo "=== Processing: $FILE ==="
+              node _scripts/generate-course.js "$FILE"
+            fi
+          done
+
+      - name: Commit generated files to repo
+        if: steps.find.outputs.files != ''
+        run: |
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git add courses/ courses-data.js sitemap.xml || true
+          if git diff --staged --quiet; then
+            echo "Nothing to commit."
+          else
+            git commit -m "bot: auto-generate course content [skip ci]"
+            git push
+          fi

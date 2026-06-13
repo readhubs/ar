@@ -1,0 +1,10 @@
+{
+  "name": "readhubs-course-generator",
+  "version": "1.0.0",
+  "description": "Automated course content generator for Readhubs GitHub Pages",
+  "private": true,
+  "scripts": {
+    "generate": "node generate-course.js"
+  },
+  "dependencies": {}
+}
