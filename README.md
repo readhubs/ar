@@ -1,49 +1,65 @@
 # Readhubs GitHub Pages — دليل الإعداد الكامل
 
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+المبدأ الأساسي: خطوة واحدة فقط لنشر كل كورس جديد
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ارفع ملف .txt إلى _courses/ في GitHub
+                    ↓
+  GitHub Actions يولّد تلقائياً:
+    • 200 مقالة HTML  (courses/<slug>/articles/)
+    • صفحة هبوط       (courses/<slug>/index.html)
+    • يُحدّث courses-data.js
+    • يُحدّث sitemap.xml
+    • يعمل commit + push تلقائي [skip ci]
+                    ↓
+  GitHub Pages ينشر الكورس على:
+  https://readhubs.github.io/ar/courses/<slug>/
+
+لا تحتاج أداة Readhubs لنشر الكورس.
+أداة Readhubs للـ PPTX فقط (لـ Udemy).
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
 ## هيكل هذا الـ ZIP
 
 ```
 readhubs-github-setup.zip
-├── github-actions-setup/          ← انسخ هذا إلى جذر مستودع GitHub (مرة واحدة)
+├── github-actions-setup/          ← انسخه لجذر GitHub (مرة واحدة فقط)
 │   ├── .github/
 │   │   └── workflows/
-│   │       └── process-course.yml  ← الـ workflow (بدون PPTX - Node.js فقط)
+│   │       └── process-course.yml  ← يُفعَّل تلقائياً عند رفع .txt
 │   ├── _scripts/
-│   │   ├── generate-course.js      ← سكريبت توليد المحتوى (بدون dependencies)
-│   │   └── package.json            ← فارغ (لا يحتاج npm install)
+│   │   ├── generate-course.js      ← يولّد 200 مقالة + صفحة هبوط
+│   │   └── package.json            ← فارغ (لا npm install)
 │   └── _courses/
-│       └── README.md               ← تعليمات مجلد الكورسات
+│       └── README.md
 │
-├── repo-base-files/               ← ارفع هذا إلى جذر المستودع (مرة واحدة)
+├── repo-base-files/               ← ارفعه لجذر GitHub (مرة واحدة فقط)
 │   ├── index.html                  ← الصفحة الرئيسية
-│   ├── style.css                   ← ملف الستايل الموحّد
-│   ├── courses-data.js             ← يُحدَّث تلقائياً بـ Actions
-│   ├── sitemap.xml                 ← تُحدَّث تلقائياً بـ Actions
+│   ├── style.css
+│   ├── courses-data.js             ← فارغ، يُحدَّث بـ Actions
+│   ├── sitemap.xml                 ← أساسي، يُحدَّث بـ Actions
 │   ├── robots.txt
-│   ├── config.js                   ← التحكم في ظهور المقالات لـ Google
-│   ├── update-visibility.js        ← يُشغَّل محلياً لتفعيل المقالات
+│   ├── config.js
+│   ├── update-visibility.js
 │   ├── about/index.html
 │   ├── deals/index.html
-│   └── niches/
-│       ├── money.html
-│       ├── communication.html
-│       ├── mental-health.html
-│       ├── productivity.html
-│       └── career.html
+│   └── niches/ (5 صفحات)
 │
 └── README.md                      ← هذا الملف
 ```
 
----
 
-## الإعداد الأول (مرة واحدة فقط)
+## الإعداد الأول — مرة واحدة فقط
 
-### الخطوة 1 — رفع ملفات الموقع الأساسية
+=== الخطوة 1: رفع ملفات الموقع ===
 
 في مستودع readhubs/ar على GitHub:
-- ارفع كل محتوى مجلد repo-base-files/ مباشرة إلى جذر (root) المستودع
+- ارفع كل محتوى مجلد repo-base-files/ إلى جذر (root) المستودع
 
-### الخطوة 2 — إعداد GitHub Actions
+=== الخطوة 2: رفع ملفات الأتمتة ===
 
 انسخ كل محتوى مجلد github-actions-setup/ إلى جذر المستودع:
 
@@ -52,63 +68,52 @@ readhubs-github-setup.zip
   _scripts/package.json
   _courses/README.md
 
-### الخطوة 3 — صلاحيات Actions (مهمة!)
+=== الخطوة 3: صلاحيات Actions (مهمة جداً) ===
 
 Settings → Actions → General → Workflow permissions
-→ اختر: Read and write permissions
+→ اختر: Read and write permissions ✓
 → احفظ
 
-### الخطوة 4 — تفعيل GitHub Pages
+=== الخطوة 4: تفعيل GitHub Pages ===
 
 Settings → Pages → Source
 → Deploy from a branch
 → Branch: main → / (root)
 → احفظ
 
----
+
+## لكل كورس جديد — خطوة واحدة فقط
+
+  ارفع ملف الكورس .txt إلى _courses/ في GitHub
+
+  هذا كل شيء. GitHub Actions يتولى الباقي تلقائياً.
+
+  مثال:
+  _courses/
+  └── negotiate-your-salary.txt   ← ارفع هذا فقط
+
+  النتيجة بعد ~2 دقيقة:
+  courses/
+  └── negotiate-your-salary/
+      ├── index.html              ← صفحة هبوط الكورس
+      └── articles/
+          ├── article-001.html
+          ├── article-002.html
+          ...
+          └── article-200.html    ← 200 مقالة SEO
+
 
 ## هل تحتاج deploy.yml منفصل؟
 
-لا. لا تحتاجه إطلاقاً.
+لا. GitHub Pages ينشر تلقائياً عند كل push لـ main.
+process-course.yml وحده يكفي.
 
-الموقع HTML ثابت (Static). GitHub Pages ينشر تلقائياً عند كل push إلى main.
-process-course.yml يكفي وحده:
-  1. يولّد HTML عند رفع .txt
-  2. يعمل commit + push تلقائي [skip ci]
-  3. GitHub Pages ينشر بعدها مباشرة
+احتاج deploy.yml فقط للـ SPA/React — وهذا الموقع HTML ثابت.
 
-تحتاج deploy.yml فقط إذا كنت تبني React/Next.js SPA — وهذا الموقع HTML ثابت.
 
----
+## تفعيل مقالات Google تدريجياً (SEO)
 
-## إضافة كورس جديد
-
-### المسار التلقائي (الأسهل):
-
-  1. افتح أداة Readhubs → ارفع ملف الكورس .txt
-  2. ارفع نفس الملف .txt إلى _courses/ في GitHub
-     ↓
-  GitHub Actions يشتغل تلقائياً (~2 دقيقة):
-    • 200 مقالة HTML في courses/<slug>/articles/
-    • صفحة هبوط courses/<slug>/index.html
-    • تحديث courses-data.js
-    • تحديث sitemap.xml
-    • commit تلقائي [skip ci]
-     ↓
-  GitHub Pages ينشر: https://readhubs.github.io/ar/courses/<slug>/
-
-### المسار اليدوي:
-
-  1. افتح أداة Readhubs → ارفع .txt → حمّل ZIP
-  2. من ZIP الناتج:
-     - ارفع courses/<slug>/ إلى GitHub
-     - أضف محتوى course-entry-snippet.js إلى courses-data.js يدوياً
-
----
-
-## تفعيل مقالات Google (SEO) — تدريجياً
-
-المقالات تبدأ بـ noindex. لتفعيلها:
+المقالات تبدأ noindex. لتفعيلها:
 
   1. عدّل config.js:
      const ARTICLE_VISIBILITY = {
@@ -121,38 +126,25 @@ process-course.yml يكفي وحده:
      git commit -m "activate 50 articles"
      git push
 
-  3. راقب Google Search Console
-  4. زِد تدريجياً: 50 → 100 → 150 → 200
+  3. راقب Google Search Console ثم زِد تدريجياً إلى 200
 
----
 
 ## تحديث رابط Udemy أو الكوبون
 
 عدّل courses-data.js في GitHub:
 
-  {
-    id: "course-slug",
-    udemy_url: "https://www.udemy.com/course/...",
-    coupon_code: "SAVE90",
-    coupon_expires: "2025-12-31",
-    status: "published"   ← غيّر من "draft" عند الجاهزية
-  }
+  udemy_url: "https://www.udemy.com/course/...",
+  coupon_code: "SAVE90",
+  coupon_expires: "2025-12-31",
+  status: "published"   ← غيّر من "draft" عند الجاهزية
 
----
 
-## ملفات لا ترفعها على GitHub
+## ما هي أداة Readhubs (PWA) إذاً؟
 
-  pptx/*.pptx          — احفظها محلياً أو على Google Drive
-  thumbnail_prompt.txt — للاستخدام مع Nanobanana فقط
-  promo_prompt.txt     — للاستخدام مع DeepSeek فقط
+أداة Readhubs منفصلة تماماً عن نشر الموقع.
+استخدمها فقط لتوليد:
+  • 24 ملف PPTX (لرفعها على Udemy)
+  • thumbnail_prompt.txt (لـ Nanobanana)
+  • promo_prompt.txt (لـ DeepSeek)
 
----
-
-## ملاحظات تقنية
-
-  - الموقع: HTML ثابت بالكامل — لا Server، لا Database
-  - الستايل: CSS موحّد (RTL، ألوان #0F1B2D/#C9A84C)
-  - الأتمتة: GitHub Actions + Node.js built-in فقط (لا npm install)
-  - SEO: noindex/index يُتحكَّم به عبر config.js
-  - البيانات: courses-data.js يُقرأ client-side
-  - GSC meta tag مضمّن في كل الصفحات
+لا علاقة لها بنشر المقالات أو صفحات الموقع.

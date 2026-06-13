@@ -1,7 +1,2 @@
-// courses-data.js
-// المصدر المركزي لبيانات جميع الكورسات
-// يُحدَّث تلقائياً بواسطة GitHub Actions عند رفع كل كورس جديد
-
-const coursesData = {
-  courses: []
-};
+// courses-data.js — يُحدَّث تلقائياً بواسطة GitHub Actions
+const coursesData = { courses: [] };
