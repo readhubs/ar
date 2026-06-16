@@ -1,0 +1,20 @@
+{
+  "name": "Readhubs — كورسات عربية عملية",
+  "short_name": "Readhubs",
+  "description": "كورسات عربية متخصصة في التطوير المهني والشخصي",
+  "start_url": "/ar/",
+  "scope": "/ar/",
+  "display": "standalone",
+  "background_color": "#0F1B2D",
+  "theme_color": "#0F1B2D",
+  "lang": "ar",
+  "dir": "rtl",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='16' fill='%230F1B2D'/><text y='.9em' font-size='80' x='10' fill='%23C9A84C'>R</text></svg>",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

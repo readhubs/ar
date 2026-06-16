@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>إضافة كورس جديد — Readhubs Admin</title>
+  <meta name="robots" content="noindex,nofollow" />
+  <link rel="stylesheet" href="../style.css" />
+  <meta name="theme-color" content="#0F1B2D" />
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <a class="logo" href="../index.html">Read<span>hubs</span></a>
+    <nav>
+      <a href="../index.html">الرئيسية</a>
+      <a href="../sitemap-builder.html">خريطة الموقع</a>
+    </nav>
+  </div>
+</header>
+
+<div class="container section" style="max-width:860px;">
+
+  <nav class="breadcrumb">
+    <a href="../index.html">الرئيسية</a>
+    <span>إضافة كورس جديد</span>
+  </nav>
+
+  <h1 class="section-title">دليل إضافة كورس جديد</h1>
+  <p class="text-sec" style="margin-bottom:32px;">
+    هذه الصفحة دليل عمل — لا تحتاج لأي سيرفر. الكورسات تُضاف يدوياً عبر GitHub.
+  </p>
+
+  <!-- STEP 1 -->
+  <div class="step-box">
+    <h2><span class="step-num">1</span> ارفع ملف txt في مجلد courses-raw</h2>
+    <p style="margin:12px 0 8px;" class="text-sec">
+      عبر واجهة GitHub على الويب:
+    </p>
+    <ol style="color:var(--text-sec);padding-right:20px;line-height:2;">
+      <li>افتح الريبو على GitHub</li>
+      <li>انتقل لمجلد <code style="color:var(--gold);">courses-raw/</code></li>
+      <li>اضغط <strong>Add file → Upload files</strong></li>
+      <li>ارفع ملف txt باسم <code style="color:var(--gold);">[slug-الكورس].txt</code>
+        <br><span style="font-size:0.82rem;">مثال: <code>negotiate-your-salary.txt</code></span>
+      </li>
+      <li>اضغط Commit changes</li>
+    </ol>
+    <div class="code-block"># التنسيق الصحيح لاسم الملف:
+# حروف إنجليزية صغيرة + شرطة فقط — لا مسافات، لا رموز خاصة
+# صحيح:   negotiate-your-salary.txt
+# صحيح:   productivity-masterclass.txt
+# خطأ:    Negotiate Your Salary.txt
+# خطأ:    productivity_masterclass.txt</div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="step-box">
+    <h2><span class="step-num">2</span> أضف بيانات الكورس في courses-data.js</h2>
+    <p style="margin:12px 0;" class="text-sec">
+      استخدم الأداة أدناه لتوليد كود JavaScript الجاهز، ثم انسخه وألصقه في ملف 
+      <code style="color:var(--gold);">courses-data.js</code> داخل المصفوفة <code>courses</code>.
+    </p>
+
+    <div style="background:var(--bg-card2);border-radius:8px;padding:20px;margin-top:16px;">
+      <h3 style="margin-bottom:16px;color:var(--gold);">مولّد كائن الكورس</h3>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div>
+          <label style="display:block;margin-bottom:4px;font-size:0.85rem;color:var(--text-sec);">Slug الكورس (بدون .txt)</label>
+          <input type="text" id="gen-slug" placeholder="negotiate-your-salary" />
+        </div>
+        <div>
+          <label style="display:block;margin-bottom:4px;font-size:0.85rem;color:var(--text-sec);">التخصص (niche)</label>
+          <select id="gen-niche" style="width:100%;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:10px;font-size:0.9rem;outline:none;">
+            <option value="career">career — المسار المهني</option>
+            <option value="money">money — المال</option>
+            <option value="communication">communication — التواصل</option>
+            <option value="mental-health">mental-health — الصحة النفسية</option>
+            <option value="productivity">productivity — الإنتاجية</option>
+          </select>
+        </div>
+        <div>
+          <label style="display:block;margin-bottom:4px;font-size:0.85rem;color:var(--text-sec);">رابط الكورس على Udemy</label>
+          <input type="text" id="gen-udemy" placeholder="https://www.udemy.com/course/..." />
+        </div>
+        <div>
+          <label style="display:block;margin-bottom:4px;font-size:0.85rem;color:var(--text-sec);">كود الكوبون (اختياري)</label>
+          <input type="text" id="gen-coupon" placeholder="READHUBS50" />
+        </div>
+        <div>
+          <label style="display:block;margin-bottom:4px;font-size:0.85rem;color:var(--text-sec);">تاريخ انتهاء الكوبون</label>
+          <input type="text" id="gen-expires" placeholder="2025-12-31T23:59:00" />
+        </div>
+        <div>
+          <label style="display:block;margin-bottom:4px;font-size:0.85rem;color:var(--text-sec);">الحالة</label>
+          <select id="gen-status" style="width:100%;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:10px;font-size:0.9rem;outline:none;">
+            <option value="draft">draft — مسودة (لا يظهر في البحث)</option>
+            <option value="published">published — منشور</option>
+          </select>
+        </div>
+      </div>
+
+      <button onclick="generateCode()" class="btn btn-gold" style="margin-top:16px;">توليد الكود</button>
+
+      <div id="generated-output" style="margin-top:16px;display:none;">
+        <label style="display:block;margin-bottom:6px;font-size:0.85rem;color:var(--text-sec);">
+          الكود الجاهز — انسخه وألصقه في مصفوفة <code>courses</code> داخل <code>courses-data.js</code>:
+        </label>
+        <div style="position:relative;">
+          <div id="generated-code" class="code-block" style="white-space:pre-wrap;"></div>
+          <button onclick="copyGeneratedCode()" 
+                  style="position:absolute;top:8px;left:8px;background:var(--gold);color:#0F1B2D;border:none;border-radius:4px;padding:4px 10px;font-size:0.78rem;cursor:pointer;"
+                  id="copy-gen-btn">
+            نسخ
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="step-box">
+    <h2><span class="step-num">3</span> تحقق من الكورس</h2>
+    <p style="color:var(--text-sec);margin-top:8px;">
+      بعد rفع الملف وتحديث courses-data.js، انتظر 1-2 دقيقة لتحديث GitHub Pages، ثم:
+    </p>
+    <ol style="color:var(--text-sec);padding-right:20px;line-height:2;margin-top:8px;">
+      <li>افتح <code style="color:var(--gold);">course.html?course=[slug]</code> للتحقق من صفحة الكورس</li>
+      <li>افتح <code style="color:var(--gold);">article.html?course=[slug]&article=1</code> للتحقق من أول مقال</li>
+      <li>تأكد من ظهور العنوان والمحتوى بشكل صحيح</li>
+      <li>لتفعيل الفهرسة: غيّر <code>status</code> من <code>draft</code> إلى <code>published</code></li>
+    </ol>
+  </div>
+
+  <!-- TXT FORMAT -->
+  <div class="step-box">
+    <h2>📄 تنسيق ملف txt</h2>
+    <p style="color:var(--text-sec);margin:8px 0 12px;">يجب أن يتبع الملف هذا التنسيق بدقة:</p>
+    <div class="code-block">[SECTION:UDEMY_DATA]
+TITLE: عنوان الكورس
+DESCRIPTION: وصف تفصيلي للكورس
+KEYWORDS: كلمة1, كلمة2, كلمة3
+AUDIENCE: الجمهور المستهدف من الكورس
+REQUIREMENTS: المتطلبات المسبقة
+OUTCOMES:
+- النتيجة الأولى
+- النتيجة الثانية
+- ...الى 8 نتائج
+[/SECTION]
+
+[SECTION:OUTLINE]
+[PART:1]
+TITLE: عنوان الجزء الأول
+LECTURES: 1,2,3,4,5,6
+[/PART]
+[PART:2]
+TITLE: عنوان الجزء الثاني
+LECTURES: 7,8,9,10,11,12
+[/PART]
+[PART:3]
+TITLE: عنوان الجزء الثالث
+LECTURES: 13,14,15,16,17,18
+[/PART]
+[PART:4]
+TITLE: عنوان الجزء الرابع
+LECTURES: 19,20,21,22,23,24
+[/PART]
+[/SECTION]
+
+[SECTION:LECTURES]
+[LECTURE:1]
+TITLE: عنوان المحاضرة
+DURATION: 12:30
+PART: 1
+[SCRIPT:START]
+نص المحاضرة المفصّل هنا. يجب أن يكون شاملاً وغنياً بالمعلومات
+لأنه المصدر الذي تُبنى عليه المقالات الثمانية.
+[SCRIPT:END]
+[SLIDES:START]
+[SLIDE:1]
+TITLE: عنوان الشريحة الأولى
+- نقطة أولى
+- نقطة ثانية
+- نقطة ثالثة
+[/SLIDE]
+[SLIDE:2]
+TITLE: عنوان الشريحة الثانية
+- نقطة أولى
+- نقطة ثانية
+[/SLIDE]
+[/SLIDES]
+[EXERCISE:START]
+TITLE: عنوان التمرين العملي
+- الخطوة الأولى
+- الخطوة الثانية
+- الخطوة الثالثة
+[EXERCISE:END]
+[/LECTURE]
+
+[LECTURE:2]
+... (24 محاضرة إجمالاً)
+[/LECTURE]
+[/SECTION]</div>
+  </div>
+
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© Readhubs Admin — <a href="../index.html">العودة للموقع</a></p>
+  </div>
+</footer>
+
+<script>
+function generateCode() {
+  const slug    = document.getElementById("gen-slug").value.trim().toLowerCase().replace(/\s+/g, "-");
+  const niche   = document.getElementById("gen-niche").value;
+  const udemy   = document.getElementById("gen-udemy").value.trim();
+  const coupon  = document.getElementById("gen-coupon").value.trim();
+  const expires = document.getElementById("gen-expires").value.trim();
+  const status  = document.getElementById("gen-status").value;
+
+  if (!slug) {
+    alert("يرجى إدخال slug الكورس أولاً.");
+    return;
+  }
+
+  const today = new Date().toISOString().split("T")[0];
+  const code = `{
+  slug: "${slug}",
+  niche: "${niche}",
+  udemy_url: "${udemy}",
+  coupon_code: "${coupon}",
+  coupon_expires: "${expires}",
+  status: "${status}",
+  thumbnail: "",
+  added_date: "${today}"
+},`;
+
+  document.getElementById("generated-code").textContent = code;
+  document.getElementById("generated-output").style.display = "block";
+}
+
+function copyGeneratedCode() {
+  const code = document.getElementById("generated-code").textContent;
+  const btn  = document.getElementById("copy-gen-btn");
+  navigator.clipboard.writeText(code).then(() => {
+    btn.textContent = "تم النسخ!";
+    setTimeout(() => { btn.textContent = "نسخ"; }, 2000);
+  }).catch(() => {
+    const el = document.createElement("textarea");
+    el.value = code;
+    el.style.position = "fixed"; el.style.opacity = "0";
+    document.body.appendChild(el);
+    el.select();
+    document.execCommand("copy");
+    document.body.removeChild(el);
+    btn.textContent = "تم النسخ!";
+    setTimeout(() => { btn.textContent = "نسخ"; }, 2000);
+  });
+}
+</script>
+</body>
+</html>

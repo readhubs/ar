@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>مولّد خريطة الموقع — Readhubs</title>
+  <meta name="robots" content="noindex,nofollow" />
+  <link rel="stylesheet" href="style.css" />
+  <meta name="theme-color" content="#0F1B2D" />
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <a class="logo" href="index.html">Read<span>hubs</span></a>
+    <nav>
+      <a href="index.html">الرئيسية</a>
+      <a href="admin/upload.html">إضافة كورس</a>
+    </nav>
+  </div>
+</header>
+
+<div class="container section" style="max-width:860px;">
+
+  <nav class="breadcrumb">
+    <a href="index.html">الرئيسية</a>
+    <span>مولّد خريطة الموقع</span>
+  </nav>
+
+  <h1 class="section-title">مولّد خريطة الموقع (sitemap.xml)</h1>
+  <p class="text-sec" style="margin-bottom:24px;">
+    يقوم هذا المولّد بإنشاء نص XML كامل لخريطة موقعك بناءً على الكورسات المنشورة في 
+    <code>courses-data.js</code>. انسخ النص الناتج وضعه في ملف <code>sitemap.xml</code> 
+    في جذر الريبو.
+  </p>
+
+  <div class="step-box" style="margin-bottom:24px;">
+    <h2>إعدادات</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;">
+      <div>
+        <label style="display:block;margin-bottom:4px;font-size:0.85rem;color:var(--text-sec);">
+          رابط الموقع الأساسي
+        </label>
+        <input type="text" id="base-url" value="https://readhubs.github.io/ar" />
+      </div>
+      <div>
+        <label style="display:block;margin-bottom:4px;font-size:0.85rem;color:var(--text-sec);">
+          تاريخ آخر تعديل (lastmod)
+        </label>
+        <input type="text" id="lastmod" id="lastmod-input" />
+      </div>
+    </div>
+    <button onclick="generateSitemap()" class="btn btn-gold" style="margin-top:16px;">
+      توليد خريطة الموقع
+    </button>
+  </div>
+
+  <div id="sitemap-output" style="display:none;">
+    <div class="flex justify-between align-center mb-8">
+      <h2 style="font-size:1rem;color:var(--text);">sitemap.xml الناتج</h2>
+      <button onclick="copySitemap()" class="btn btn-outline btn-sm" id="copy-sitemap-btn">نسخ الكل</button>
+    </div>
+    <div id="url-count" class="text-sec" style="font-size:0.85rem;margin-bottom:8px;"></div>
+    <textarea id="sitemap-text" rows="20" readonly style="font-family:monospace;font-size:0.8rem;"></textarea>
+  </div>
+
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© Readhubs — <a href="index.html">الرئيسية</a></p>
+  </div>
+</footer>
+
+<script src="courses-data.js"></script>
+<script>
+// Set default lastmod to today
+document.getElementById("lastmod").value = new Date().toISOString().split("T")[0];
+
+function escXml(str) {
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function generateSitemap() {
+  const base    = (document.getElementById("base-url").value || "https://readhubs.github.io/ar").replace(/\/+$/, "");
+  const lastmod = document.getElementById("lastmod").value || new Date().toISOString().split("T")[0];
+
+  const courses = (typeof coursesData !== "undefined" && Array.isArray(coursesData.courses))
+    ? coursesData.courses.filter(c => c.status === "published")
+    : [];
+
+  const urls = [];
+
+  // Static pages
+  const staticPages = [
+    { loc: base + "/", priority: "1.0", changefreq: "daily" },
+    { loc: base + "/deals.html", priority: "0.9", changefreq: "daily" },
+    { loc: base + "/about.html", priority: "0.5", changefreq: "monthly" },
+    { loc: base + "/niches/money.html", priority: "0.7", changefreq: "weekly" },
+    { loc: base + "/niches/communication.html", priority: "0.7", changefreq: "weekly" },
+    { loc: base + "/niches/mental-health.html", priority: "0.7", changefreq: "weekly" },
+    { loc: base + "/niches/productivity.html", priority: "0.7", changefreq: "weekly" },
+    { loc: base + "/niches/career.html", priority: "0.7", changefreq: "weekly" },
+  ];
+  urls.push(...staticPages);
+
+  // Course pages + all 200 articles per course
+  for (const course of courses) {
+    const slug = course.slug;
+    urls.push({
+      loc: base + "/course.html?course=" + encodeURIComponent(slug),
+      priority: "0.8",
+      changefreq: "weekly"
+    });
+    for (let n = 1; n <= 200; n++) {
+      urls.push({
+        loc: base + "/article.html?course=" + encodeURIComponent(slug) + "&article=" + n,
+        priority: "0.6",
+        changefreq: "monthly"
+      });
+    }
+  }
+
+  const lines = [
+    '<?xml version="1.0" encoding="UTF-8"?>',
+    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
+  ];
+
+  for (const u of urls) {
+    lines.push("  <url>");
+    lines.push("    <loc>" + escXml(u.loc) + "</loc>");
+    lines.push("    <lastmod>" + lastmod + "</lastmod>");
+    lines.push("    <changefreq>" + u.changefreq + "</changefreq>");
+    lines.push("    <priority>" + u.priority + "</priority>");
+    lines.push("  </url>");
+  }
+
+  lines.push("</urlset>");
+
+  const xml = lines.join("\n");
+  document.getElementById("sitemap-text").value = xml;
+  document.getElementById("url-count").textContent =
+    "إجمالي الروابط: " + urls.length.toLocaleString("ar") + " رابط";
+  document.getElementById("sitemap-output").style.display = "block";
+}
+
+function copySitemap() {
+  const text = document.getElementById("sitemap-text").value;
+  const btn  = document.getElementById("copy-sitemap-btn");
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = "تم النسخ!";
+    setTimeout(() => { btn.textContent = "نسخ الكل"; }, 2000);
+  }).catch(() => {
+    document.getElementById("sitemap-text").select();
+    document.execCommand("copy");
+    btn.textContent = "تم النسخ!";
+    setTimeout(() => { btn.textContent = "نسخ الكل"; }, 2000);
+  });
+}
+</script>
+</body>
+</html>

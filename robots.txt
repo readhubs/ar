@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://readhubs.github.io/ar/sitemap.xml

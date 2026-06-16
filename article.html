@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>جارٍ التحميل… — Readhubs</title>
+  <meta name="description" content="" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#0F1B2D" />
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <a class="logo" href="index.html">Read<span>hubs</span></a>
+    <nav>
+      <a href="niches/money.html">المال</a>
+      <a href="niches/communication.html">التواصل</a>
+      <a href="niches/mental-health.html">الصحة النفسية</a>
+      <a href="niches/productivity.html">الإنتاجية</a>
+      <a href="niches/career.html">المسار المهني</a>
+    </nav>
+  </div>
+</header>
+
+<div id="noindex-banner" class="noindex-banner container mt-16" style="display:none;">
+  هذا المحتوى قيد الإعداد ولن يظهر في نتائج البحث حتى يتم نشره.
+</div>
+
+<main class="article-wrap" id="article-main">
+  <div class="loading"><div class="spinner"></div><p>جارٍ تحميل المقال…</p></div>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© Readhubs — <a href="index.html">الرئيسية</a> · <a href="deals.html">العروض</a></p>
+  </div>
+</footer>
+
+<script src="courses-data.js"></script>
+<script src="article-engine.js"></script>
+<script src="floating-button.js"></script>
+<script>
+(async function () {
+  "use strict";
+
+  const params  = new URLSearchParams(window.location.search);
+  const slug    = (params.get("course") || "").trim();
+  const artNum  = parseInt(params.get("article") || "0", 10);
+  const main    = document.getElementById("article-main");
+
+  function showError(msg, suggestion) {
+    main.innerHTML = `
+      <div class="error-state">
+        <h3>⚠️ ${msg}</h3>
+        <p>${suggestion || ""}</p>
+        <a href="index.html" class="btn btn-outline btn-sm" style="margin-top:16px;">العودة للرئيسية</a>
+      </div>`;
+    document.title = "خطأ — Readhubs";
+  }
+
+  // Validate inputs
+  if (!slug) {
+    showError("لم يتم تحديد الكورس", "يرجى فتح المقال من صفحة الكورس.");
+    return;
+  }
+  if (isNaN(artNum) || artNum < 1 || artNum > 200) {
+    showError(
+      "رقم المقال غير صحيح",
+      `رقم المقال يجب أن يكون بين 1 و 200. <a href="course.html?course=${encodeURIComponent(slug)}">اعرض الكورس</a>`
+    );
+    return;
+  }
+
+  // Check courses-data.js for this slug and its status
+  let courseRecord = null;
+  if (typeof coursesData !== "undefined" && Array.isArray(coursesData.courses)) {
+    courseRecord = coursesData.courses.find(c => c.slug === slug) || null;
+  }
+
+  if (!courseRecord) {
+    showError(
+      "الكورس غير موجود في قائمة الكورسات",
+      "تأكد من إضافة الكورس في ملف courses-data.js أولاً."
+    );
+    return;
+  }
+
+  // Show noindex banner if draft
+  if (courseRecord.status === "draft") {
+    const metaRobots = document.createElement("meta");
+    metaRobots.name    = "robots";
+    metaRobots.content = "noindex,nofollow";
+    document.head.appendChild(metaRobots);
+    document.getElementById("noindex-banner").style.display = "block";
+  }
+
+  // Fetch the course txt file
+  let rawText = "";
+  try {
+    const resp = await fetch("courses-raw/" + slug + ".txt");
+    if (!resp.ok) throw new Error("HTTP " + resp.status);
+    rawText = await resp.text();
+  } catch (err) {
+    showError(
+      "تعذر تحميل المحتوى",
+      "تأكد من رفع ملف الكورس بشكل صحيح في مجلد courses-raw/."
+    );
+    return;
+  }
+
+  // Parse
+  const parsed = parseCourseFile(rawText);
+  if (!parsed) {
+    showError(
+      "ملف الكورس تالف أو فارغ",
+      "تأكد من أن ملف txt يتبع التنسيق المطلوب."
+    );
+    return;
+  }
+
+  // Generate article
+  const article = generateArticle(artNum, parsed, slug);
+  if (!article) {
+    showError(
+      "لم يتم العثور على المحاضرة المطلوبة",
+      `رقم المقال ${artNum} يتجاوز عدد المحاضرات المتاحة في هذا الكورس. <a href="course.html?course=${encodeURIComponent(slug)}">اعرض الكورس</a>`
+    );
+    return;
+  }
+
+  // Set meta
+  document.title = article.title + " — Readhubs";
+  const metaDesc = document.querySelector("meta[name='description']");
+  if (metaDesc) {
+    const snippet = article.body.replace(/<[^>]*>/g, "").trim().substring(0, 160);
+    metaDesc.content = snippet;
+  }
+
+  // Build breadcrumb
+  const courseTitle = parsed.udemyData.title;
+  const breadcrumb = `
+    <nav class="breadcrumb" aria-label="مسار التنقل">
+      <a href="index.html">الرئيسية</a>
+      <span><a href="course.html?course=${encodeURIComponent(slug)}">${courseTitle}</a></span>
+      <span>مقال ${artNum}</span>
+    </nav>`;
+
+  // Build related articles
+  const resolved = resolveArticle(artNum, parsed);
+  let relatedHtml = "";
+  if (resolved) {
+    const related = [];
+    if (resolved.type === "lecture") {
+      const lec = resolved.lecture;
+      const startArticle = (lec.number - 1) * 8 + 1;
+      const templateNames = ["ما هو؟","كيف تطبق؟","لماذا مهم؟","أخطاء شائعة","نصائح عملية","أمثلة واقعية","مقارنة","دليل كامل"];
+      for (let t = 1; t <= 8; t++) {
+        const n = startArticle + t - 1;
+        if (n !== artNum) {
+          related.push({ n, label: templateNames[t - 1] });
+        }
+      }
+    } else {
+      // Course-level: link back to a few others
+      for (let i = 193; i <= 200; i++) {
+        if (i !== artNum) {
+          related.push({ n: i, label: "مقال " + i });
+        }
+      }
+    }
+    if (related.length > 0) {
+      relatedHtml = `
+        <section class="related-section">
+          <h2 class="section-title">مقالات ذات صلة</h2>
+          <div class="related-grid">
+            ${related.slice(0, 6).map(r =>
+              `<a class="related-card" href="article.html?course=${encodeURIComponent(slug)}&article=${r.n}">${r.label}</a>`
+            ).join("")}
+          </div>
+        </section>`;
+    }
+  }
+
+  // Build CTA box
+  const now = Date.now();
+  let ctaHtml = "";
+  const hasActiveCoupon = courseRecord.coupon_code &&
+    courseRecord.coupon_expires &&
+    new Date(courseRecord.coupon_expires).getTime() > now;
+
+  if (courseRecord.udemy_url) {
+    ctaHtml = `
+      <div class="cta-box">
+        <h3>اشترِ الكورس الكامل على Udemy</h3>
+        <p>${courseTitle}</p>
+        ${hasActiveCoupon ? `<div class="coupon-badge">كود الخصم: ${courseRecord.coupon_code}</div><br>` : ""}
+        <a href="${courseRecord.udemy_url}${hasActiveCoupon ? '?couponCode=' + encodeURIComponent(courseRecord.coupon_code) : ''}"
+           target="_blank" rel="noopener" class="btn btn-gold">
+          ${hasActiveCoupon ? "🎉 احصل على الخصم الآن" : "اشترِ الآن على Udemy"}
+        </a>
+      </div>`;
+  }
+
+  // Render
+  main.innerHTML = `
+    ${breadcrumb}
+    <article>
+      <h1>${article.title}</h1>
+      <div class="article-meta">كورس: <a href="course.html?course=${encodeURIComponent(slug)}">${courseTitle}</a> · مقال ${artNum} من 200</div>
+      ${ctaHtml}
+      <div class="article-body">${article.body}</div>
+    </article>
+    ${relatedHtml}
+    ${ctaHtml}
+    <div style="margin-top:24px;">
+      <a href="course.html?course=${encodeURIComponent(slug)}" class="btn btn-outline btn-sm">← عودة للكورس</a>
+    </div>`;
+})();
+</script>
+</body>
+</html>

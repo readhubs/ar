@@ -1,89 +1,157 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="robots" content="index, follow">
-  <meta name="google-site-verification" content="pgigX05_bS7NIfxgAqbgPF1yhXFxfBwGxSSkj62HsC4" />
-  <title>Readhubs - تعلّم وتطوّر</title>
-  <meta name="description" content="Readhubs - منصة للكورسات التعليمية العربية في التطوير الذاتي والمهني">
-  <link rel="canonical" href="https://readhubs.github.io/ar/">
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Readhubs — كورسات عربية عملية</title>
+  <meta name="description" content="Readhubs: منصة كورسات عربية عملية في التطوير المهني والمالي والإنتاجية والتواصل وأكثر." />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#0F1B2D" />
 </head>
 <body>
-  <header class="site-header">
-    <a href="index.html" class="logo">Readhubs</a>
-    <nav class="site-nav">
+
+<header class="site-header">
+  <div class="container">
+    <a class="logo" href="index.html">Read<span>hubs</span></a>
+    <nav>
       <a href="niches/money.html">المال</a>
       <a href="niches/communication.html">التواصل</a>
       <a href="niches/mental-health.html">الصحة النفسية</a>
       <a href="niches/productivity.html">الإنتاجية</a>
-      <a href="niches/career.html">المسيرة المهنية</a>
-      <a href="deals/index.html">العروض 🔥</a>
+      <a href="niches/career.html">المسار المهني</a>
     </nav>
-  </header>
+  </div>
+</header>
 
-  <section class="site-hero">
-    <h1>تعلّم. طوّر نفسك. انجح.</h1>
-    <p>كورسات عربية احترافية في التطوير الذاتي، المال، المسيرة المهنية والمزيد</p>
-  </section>
+<!-- HERO -->
+<section class="hero">
+  <h1>طوّر نفسك بمحتوى عربي عملي</h1>
+  <p>كورسات متخصصة في التطوير المهني والشخصي، مُصممة للمحترف العربي الباحث عن نتائج حقيقية.</p>
+  <a href="#courses" class="btn btn-gold">استعرض الكورسات</a>
+</section>
 
-  <main>
-    <section id="weekly-deals" style="padding:2rem; max-width:1200px; margin:0 auto;">
-      <h2 class="section-title">⚡ عروض الأسبوع</h2>
-      <div id="deals-container" class="courses-grid"></div>
-      <div id="no-deals-msg" class="no-deals" style="display:none;">لا توجد عروض نشطة حالياً. تابعنا للحصول على أحدث الكوبونات!</div>
-    </section>
+<!-- DEALS PREVIEW -->
+<section class="section" id="deals-preview">
+  <div class="container">
+    <div class="flex justify-between align-center mb-16">
+      <h2 class="section-title">🔥 عروض الأسبوع</h2>
+      <a href="deals.html" class="btn btn-outline btn-sm">عرض الكل</a>
+    </div>
+    <div class="cards-grid" id="deals-preview-grid">
+      <div class="loading"><div class="spinner"></div><p>جارٍ التحميل…</p></div>
+    </div>
+  </div>
+</section>
 
-    <section id="all-courses" style="padding:2rem; max-width:1200px; margin:0 auto;">
-      <h2 class="section-title">جميع الكورسات</h2>
-      <div id="courses-container" class="courses-grid"></div>
-      <div id="no-courses-msg" class="no-deals" style="display:none;">لا توجد كورسات منشورة بعد. قريباً!</div>
-    </section>
-  </main>
+<!-- ALL COURSES -->
+<section class="section" id="courses">
+  <div class="container">
+    <h2 class="section-title">جميع الكورسات</h2>
+    <div class="cards-grid" id="courses-grid">
+      <div class="loading"><div class="spinner"></div><p>جارٍ التحميل…</p></div>
+    </div>
+  </div>
+</section>
 
-  <footer class="site-footer">
-    <span>&copy; 2026 Readhubs</span>
-    <a href="about/index.html">من نحن</a>
-    <a href="deals/index.html">العروض والكوبونات</a>
-  </footer>
+<footer class="site-footer">
+  <div class="container">
+    <p>© Readhubs — <a href="about.html">من نحن</a> · <a href="deals.html">العروض</a> · <a href="sitemap-builder.html">خريطة الموقع</a></p>
+  </div>
+</footer>
 
-  <script src="courses-data.js"></script>
-  <script>
-    (function() {
-      if (typeof coursesData === "undefined") return;
-      var courses = coursesData.courses || [];
-      var today = new Date().toISOString().slice(0, 10);
+<script src="courses-data.js"></script>
+<script src="floating-button.js"></script>
+<script>
+(async function () {
+  const nicheLabels = {
+    money: "المال",
+    communication: "التواصل",
+    "mental-health": "الصحة النفسية",
+    productivity: "الإنتاجية",
+    career: "المسار المهني"
+  };
 
-      // Weekly deals
-      var deals = courses.filter(function(c) {
-        return c.coupon_code && c.coupon_expires && c.coupon_expires >= today;
-      });
+  const now = Date.now();
 
-      var dealsEl = document.getElementById("deals-container");
-      var noDealsEl = document.getElementById("no-deals-msg");
-      if (deals.length === 0) {
-        dealsEl.style.display = "none";
-        if (noDealsEl) noDealsEl.style.display = "block";
-      } else {
-        deals.forEach(function(c) {
-          dealsEl.innerHTML += '<div class="course-card"><div class="course-card-body"><h3>' + c.title_ar + '</h3><span class="coupon-code">' + c.coupon_code + '</span></div></div>';
-        });
-      }
+  function isActiveCoupon(course) {
+    return (
+      course.status === "published" &&
+      course.coupon_code &&
+      course.coupon_expires &&
+      new Date(course.coupon_expires).getTime() > now
+    );
+  }
 
-      // All published courses
-      var published = courses.filter(function(c) { return c.status === "published"; });
-      var coursesEl = document.getElementById("courses-container");
-      var noCourseEl = document.getElementById("no-courses-msg");
-      if (published.length === 0) {
-        coursesEl.style.display = "none";
-        if (noCourseEl) noCourseEl.style.display = "block";
-      } else {
-        published.forEach(function(c) {
-          coursesEl.innerHTML += '<a href="courses/' + c.id + '/index.html" class="course-card" style="display:block;"><img src="' + (c.thumbnail || "") + '" alt="' + c.title_ar + '" onerror="this.style.display='none'"><div class="course-card-body"><h3>' + c.title_ar + '</h3></div></a>';
-        });
-      }
-    })();
-  </script>
+  async function getCourseTitle(slug) {
+    try {
+      const resp = await fetch("courses-raw/" + slug + ".txt");
+      if (!resp.ok) return slug;
+      const text = await resp.text();
+      const m = text.match(/\[SECTION:UDEMY_DATA\][\s\S]*?TITLE:\s*(.+)/i);
+      return m ? m[1].trim() : slug;
+    } catch {
+      return slug;
+    }
+  }
+
+  function buildCard(course, title) {
+    const active = isActiveCoupon(course);
+    return `
+      <a href="course.html?course=${encodeURIComponent(course.slug)}" class="card" style="text-decoration:none;color:inherit;">
+        <div>
+          <span class="card-niche">${nicheLabels[course.niche] || course.niche}</span>
+        </div>
+        <div class="card-title">${title}</div>
+        ${active ? `<div class="coupon-badge" style="font-size:0.78rem;padding:3px 8px;">🏷️ ${course.coupon_code}</div>` : ""}
+        <div class="card-footer">
+          <span class="btn btn-gold btn-sm" style="display:inline-block;">عرض الكورس →</span>
+        </div>
+      </a>`;
+  }
+
+  const courses = (typeof coursesData !== "undefined" && Array.isArray(coursesData.courses))
+    ? coursesData.courses : [];
+
+  const published = courses.filter(c => c.status === "published");
+
+  // Load deals preview (top 3 active coupons)
+  const dealsPreviewGrid = document.getElementById("deals-preview-grid");
+  const dealCourses = published.filter(isActiveCoupon).slice(0, 3);
+
+  if (dealCourses.length === 0) {
+    dealsPreviewGrid.innerHTML = `
+      <div class="empty-state" style="grid-column:1/-1;">
+        <div class="icon">🎫</div>
+        <h3>لا توجد عروض نشطة حالياً</h3>
+        <p class="text-sec">تابعنا لمعرفة أحدث العروض والكوبونات.</p>
+      </div>`;
+  } else {
+    const cards = await Promise.all(dealCourses.map(async c => {
+      const title = await getCourseTitle(c.slug);
+      return buildCard(c, title);
+    }));
+    dealsPreviewGrid.innerHTML = cards.join("");
+  }
+
+  // Load all published courses
+  const coursesGrid = document.getElementById("courses-grid");
+
+  if (published.length === 0) {
+    coursesGrid.innerHTML = `
+      <div class="empty-state" style="grid-column:1/-1;">
+        <div class="icon">📚</div>
+        <h3>لا توجد كورسات بعد</h3>
+        <p class="text-sec">سيتم إضافة الكورسات قريباً. تابعنا!</p>
+      </div>`;
+  } else {
+    const cards = await Promise.all(published.map(async c => {
+      const title = await getCourseTitle(c.slug);
+      return buildCard(c, title);
+    }));
+    coursesGrid.innerHTML = cards.join("");
+  }
+})();
+</script>
 </body>
 </html>

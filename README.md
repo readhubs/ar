@@ -1,150 +1,163 @@
-# Readhubs GitHub Pages — دليل الإعداد الكامل
+# Readhubs — كورسات عربية عملية
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-المبدأ الأساسي: خطوة واحدة فقط لنشر كل كورس جديد
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+دليل النشر وإضافة الكورسات في 3 خطوات.
 
-  ارفع ملف .txt إلى _courses/ في GitHub
-                    ↓
-  GitHub Actions يولّد تلقائياً:
-    • 200 مقالة HTML  (courses/<slug>/articles/)
-    • صفحة هبوط       (courses/<slug>/index.html)
-    • يُحدّث courses-data.js
-    • يُحدّث sitemap.xml
-    • يعمل commit + push تلقائي [skip ci]
-                    ↓
-  GitHub Pages ينشر الكورس على:
-  https://readhubs.github.io/ar/courses/<slug>/
+---
 
-لا تحتاج أداة Readhubs لنشر الكورس.
-أداة Readhubs للـ PPTX فقط (لـ Udemy).
+## الخطوة 1: نشر الموقع على GitHub Pages
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. أنشئ ريبو باسم `readhubs.github.io` (إذا لم يكن موجوداً)
+2. ارفع هذه الملفات في مجلد `ar/` داخل جذر الريبو
+3. في إعدادات الريبو → **Pages** → اختر `main` branch → اضغط **Save**
+4. الموقع سيكون متاحاً على: `https://readhubs.github.io/ar/`
 
+> **ملاحظة:** انتظر 2-5 دقائق بعد رفع الملفات حتى يتفعل GitHub Pages.
 
-## هيكل هذا الـ ZIP
+---
+
+## الخطوة 2: إضافة أول كورس
+
+### أ. أنشئ ملف txt للكورس
+
+اصنع ملف نصي باسم `[slug-الكورس].txt` (أحرف إنجليزية صغيرة وشرطة فقط).  
+مثال: `negotiate-your-salary.txt`
+
+يجب أن يتبع الملف هذا التنسيق:
 
 ```
-readhubs-github-setup.zip
-├── github-actions-setup/          ← انسخه لجذر GitHub (مرة واحدة فقط)
-│   ├── .github/
-│   │   └── workflows/
-│   │       └── process-course.yml  ← يُفعَّل تلقائياً عند رفع .txt
-│   ├── _scripts/
-│   │   ├── generate-course.js      ← يولّد 200 مقالة + صفحة هبوط
-│   │   └── package.json            ← فارغ (لا npm install)
-│   └── _courses/
-│       └── README.md
-│
-├── repo-base-files/               ← ارفعه لجذر GitHub (مرة واحدة فقط)
-│   ├── index.html                  ← الصفحة الرئيسية
-│   ├── style.css
-│   ├── courses-data.js             ← فارغ، يُحدَّث بـ Actions
-│   ├── sitemap.xml                 ← أساسي، يُحدَّث بـ Actions
-│   ├── robots.txt
-│   ├── config.js
-│   ├── update-visibility.js
-│   ├── about/index.html
-│   ├── deals/index.html
-│   └── niches/ (5 صفحات)
-│
-└── README.md                      ← هذا الملف
+[SECTION:UDEMY_DATA]
+TITLE: عنوان الكورس الكامل
+DESCRIPTION: وصف تفصيلي من 2-3 جمل
+KEYWORDS: كلمة1, كلمة2, كلمة3
+AUDIENCE: الجمهور المستهدف
+REQUIREMENTS: المتطلبات المسبقة
+OUTCOMES:
+- النتيجة الأولى بعد إتمام الكورس
+- النتيجة الثانية
+- ...حتى 8 نتائج
+[/SECTION]
+
+[SECTION:OUTLINE]
+[PART:1]
+TITLE: عنوان الجزء الأول
+LECTURES: 1,2,3,4,5,6
+[/PART]
+[PART:2]
+TITLE: عنوان الجزء الثاني
+LECTURES: 7,8,9,10,11,12
+[/PART]
+[PART:3]
+TITLE: عنوان الجزء الثالث
+LECTURES: 13,14,15,16,17,18
+[/PART]
+[PART:4]
+TITLE: عنوان الجزء الرابع
+LECTURES: 19,20,21,22,23,24
+[/PART]
+[/SECTION]
+
+[SECTION:LECTURES]
+[LECTURE:1]
+TITLE: عنوان المحاضرة الأولى
+DURATION: 10:30
+PART: 1
+[SCRIPT:START]
+نص المحاضرة التفصيلي هنا — كلما كان أطول وأغنى، كانت المقالات أفضل.
+يجب أن يحتوي على معلومات قيّمة وشاملة حول موضوع المحاضرة.
+[SCRIPT:END]
+[SLIDES:START]
+[SLIDE:1]
+TITLE: عنوان الشريحة الأولى
+- نقطة أساسية أولى
+- نقطة أساسية ثانية
+- نقطة أساسية ثالثة
+[/SLIDE]
+[SLIDE:2]
+TITLE: عنوان الشريحة الثانية
+- نقطة أخرى
+- نقطة أخرى
+[/SLIDE]
+[/SLIDES]
+[EXERCISE:START]
+TITLE: عنوان التمرين العملي
+- الخطوة الأولى في التمرين
+- الخطوة الثانية
+- الخطوة الثالثة
+[EXERCISE:END]
+[/LECTURE]
+
+[LECTURE:2]
+... كرر لكل المحاضرات الـ24 ...
+[/LECTURE]
+[/SECTION]
 ```
 
+### ب. ارفع الملف على GitHub
 
-## الإعداد الأول — مرة واحدة فقط
+1. افتح الريبو على GitHub
+2. انتقل لمجلد `ar/courses-raw/`
+3. اضغط **Add file → Upload files**
+4. ارفع الملف واضغط **Commit changes**
 
-=== الخطوة 1: رفع ملفات الموقع ===
+### ج. أضف بيانات الكورس في `courses-data.js`
 
-في مستودع readhubs/ar على GitHub:
-- ارفع كل محتوى مجلد repo-base-files/ إلى جذر (root) المستودع
+افتح ملف `ar/courses-data.js` وأضف كائناً جديداً داخل مصفوفة `courses`:
 
-=== الخطوة 2: رفع ملفات الأتمتة ===
-
-انسخ كل محتوى مجلد github-actions-setup/ إلى جذر المستودع:
-
-  .github/workflows/process-course.yml
-  _scripts/generate-course.js
-  _scripts/package.json
-  _courses/README.md
-
-=== الخطوة 3: صلاحيات Actions (مهمة جداً) ===
-
-Settings → Actions → General → Workflow permissions
-→ اختر: Read and write permissions ✓
-→ احفظ
-
-=== الخطوة 4: تفعيل GitHub Pages ===
-
-Settings → Pages → Source
-→ Deploy from a branch
-→ Branch: main → / (root)
-→ احفظ
-
-
-## لكل كورس جديد — خطوة واحدة فقط
-
-  ارفع ملف الكورس .txt إلى _courses/ في GitHub
-
-  هذا كل شيء. GitHub Actions يتولى الباقي تلقائياً.
-
-  مثال:
-  _courses/
-  └── negotiate-your-salary.txt   ← ارفع هذا فقط
-
-  النتيجة بعد ~2 دقيقة:
-  courses/
-  └── negotiate-your-salary/
-      ├── index.html              ← صفحة هبوط الكورس
-      └── articles/
-          ├── article-001.html
-          ├── article-002.html
-          ...
-          └── article-200.html    ← 200 مقالة SEO
-
-
-## هل تحتاج deploy.yml منفصل؟
-
-لا. GitHub Pages ينشر تلقائياً عند كل push لـ main.
-process-course.yml وحده يكفي.
-
-احتاج deploy.yml فقط للـ SPA/React — وهذا الموقع HTML ثابت.
-
-
-## تفعيل مقالات Google تدريجياً (SEO)
-
-المقالات تبدأ noindex. لتفعيلها:
-
-  1. عدّل config.js:
-     const ARTICLE_VISIBILITY = {
-       "course-slug": 50,
-     };
-
-  2. في جهازك (بعد git clone):
-     node update-visibility.js
-     git add .
-     git commit -m "activate 50 articles"
-     git push
-
-  3. راقب Google Search Console ثم زِد تدريجياً إلى 200
-
-
-## تحديث رابط Udemy أو الكوبون
-
-عدّل courses-data.js في GitHub:
-
+```javascript
+{
+  slug: "negotiate-your-salary",        // يطابق اسم ملف txt بدون الامتداد
+  niche: "career",                       // money | communication | mental-health | productivity | career
   udemy_url: "https://www.udemy.com/course/...",
-  coupon_code: "SAVE90",
-  coupon_expires: "2025-12-31",
-  status: "published"   ← غيّر من "draft" عند الجاهزية
+  coupon_code: "READHUBS50",             // أو "" إذا لا يوجد كوبون
+  coupon_expires: "2025-12-31T23:59:00", // أو "" إذا لا يوجد
+  status: "published",                   // draft = مخفي من البحث | published = مفهرس
+  thumbnail: "",
+  added_date: "2025-01-01"
+},
+```
 
+### د. تحقق من الكورس
 
-## ما هي أداة Readhubs (PWA) إذاً؟
+- صفحة الكورس: `https://readhubs.github.io/ar/course.html?course=negotiate-your-salary`
+- أول مقال: `https://readhubs.github.io/ar/article.html?course=negotiate-your-salary&article=1`
 
-أداة Readhubs منفصلة تماماً عن نشر الموقع.
-استخدمها فقط لتوليد:
-  • 24 ملف PPTX (لرفعها على Udemy)
-  • thumbnail_prompt.txt (لـ Nanobanana)
-  • promo_prompt.txt (لـ DeepSeek)
+---
 
-لا علاقة لها بنشر المقالات أو صفحات الموقع.
+## ملاحظات هامة
+
+- **الكورسات المسودة** (`status: "draft"`) تظهر بشكل طبيعي لمن يعرف الرابط، لكنها لا تُفهرس من محركات البحث ولا تظهر في الرئيسية.
+- **لتفعيل فهرسة كورس:** غيّر `status` من `"draft"` إلى `"published"` في `courses-data.js`.
+- **كل كورس يولّد 200 مقال تلقائياً** من ملف txt الواحد — لا حاجة لأي خطوات إضافية.
+- **لتحديث بيانات الكوبون:** عدّل `coupon_code` و`coupon_expires` في `courses-data.js` فقط.
+- **صفحة المساعدة:** `https://readhubs.github.io/ar/admin/upload.html` — تحتوي على مولّد كود تلقائي لبيانات الكورس.
+- **خريطة الموقع:** افتح `https://readhubs.github.io/ar/sitemap-builder.html` وانسخ النص الناتج إلى ملف `sitemap.xml`.
+
+---
+
+## هيكل الملفات
+
+```
+ar/
+├── index.html              ← الصفحة الرئيسية
+├── article.html            ← قالب المقالات (200 مقال × عدد الكورسات)
+├── course.html             ← قالب صفحة الكورس
+├── deals.html              ← صفحة العروض والكوبونات
+├── about.html              ← صفحة من نحن
+├── style.css               ← نظام التصميم الموحد
+├── courses-data.js         ← سجل الكورسات (تُعدّله يدوياً)
+├── article-engine.js       ← محرك توليد المقالات
+├── floating-button.js      ← زر CTA العائم + تسجيل SW
+├── sw.js                   ← Service Worker (PWA)
+├── manifest.json           ← بيانات PWA
+├── sitemap-builder.html    ← مولّد خريطة الموقع
+├── courses-raw/            ← ارفع ملفات txt الكورسات هنا
+│   └── [slug].txt
+├── niches/
+│   ├── money.html
+│   ├── communication.html
+│   ├── mental-health.html
+│   ├── productivity.html
+│   └── career.html
+└── admin/
+    └── upload.html         ← دليل إضافة الكورسات
+```

@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>عروض وكوبونات الكورسات — Readhubs</title>
+  <meta name="description" content="أحدث عروض وكوبونات كورسات Readhubs على Udemy. كوبونات حصرية بأسعار مخفضة لفترة محدودة." />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#0F1B2D" />
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <a class="logo" href="index.html">Read<span>hubs</span></a>
+    <nav>
+      <a href="niches/money.html">المال</a>
+      <a href="niches/communication.html">التواصل</a>
+      <a href="niches/mental-health.html">الصحة النفسية</a>
+      <a href="niches/productivity.html">الإنتاجية</a>
+      <a href="niches/career.html">المسار المهني</a>
+    </nav>
+  </div>
+</header>
+
+<div class="container section">
+  <h1 class="section-title">🔥 عروض وكوبونات نشطة</h1>
+  <p class="text-sec" style="margin-bottom:32px;">كوبونات خصم على كورسات Udemy لفترة محدودة — انقر على الكود لنسخه.</p>
+  <div class="cards-grid" id="deals-grid">
+    <div class="loading"><div class="spinner"></div><p>جارٍ تحميل العروض…</p></div>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© Readhubs — <a href="index.html">الرئيسية</a> · <a href="about.html">من نحن</a></p>
+  </div>
+</footer>
+
+<script src="courses-data.js"></script>
+<script src="floating-button.js"></script>
+<script>
+(async function () {
+  "use strict";
+
+  const grid = document.getElementById("deals-grid");
+  const now  = Date.now();
+
+  const courses = (typeof coursesData !== "undefined" && Array.isArray(coursesData.courses))
+    ? coursesData.courses : [];
+
+  const activeCoupons = courses.filter(c =>
+    c.status === "published" &&
+    c.coupon_code &&
+    c.coupon_expires &&
+    new Date(c.coupon_expires).getTime() > now
+  );
+
+  if (activeCoupons.length === 0) {
+    grid.innerHTML = `
+      <div class="empty-state" style="grid-column:1/-1;">
+        <div class="icon">🎫</div>
+        <h3>لا توجد عروض نشطة حالياً</h3>
+        <p class="text-sec">تابعنا على وسائل التواصل الاجتماعي لتصلك أحدث العروض فور صدورها.</p>
+        <a href="index.html" class="btn btn-gold" style="margin-top:16px;">تصفح الكورسات</a>
+      </div>`;
+    return;
+  }
+
+  async function getCourseTitle(slug) {
+    try {
+      const resp = await fetch("courses-raw/" + slug + ".txt");
+      if (!resp.ok) return slug;
+      const text = await resp.text();
+      const m = text.match(/\[SECTION:UDEMY_DATA\][\s\S]*?TITLE:\s*(.+)/i);
+      return m ? m[1].trim() : slug;
+    } catch {
+      return slug;
+    }
+  }
+
+  function buildCountdownHtml(expiresStr, cardId) {
+    return `
+      <div class="countdown" id="cd-${cardId}">
+        <div class="countdown-unit"><span class="countdown-num" id="cd-d-${cardId}">--</span><span class="countdown-lbl">يوم</span></div>
+        <div class="countdown-unit"><span class="countdown-num" id="cd-h-${cardId}">--</span><span class="countdown-lbl">ساعة</span></div>
+        <div class="countdown-unit"><span class="countdown-num" id="cd-m-${cardId}">--</span><span class="countdown-lbl">دقيقة</span></div>
+        <div class="countdown-unit"><span class="countdown-num" id="cd-s-${cardId}">--</span><span class="countdown-lbl">ثانية</span></div>
+      </div>`;
+  }
+
+  function startCountdown(cardId, expiresStr) {
+    const expiresAt = new Date(expiresStr).getTime();
+
+    function tick() {
+      const diff = expiresAt - Date.now();
+      if (diff <= 0) {
+        const cdEl = document.getElementById("cd-" + cardId);
+        if (cdEl) cdEl.innerHTML = "<span style='color:var(--red);'>انتهى العرض</span>";
+        return;
+      }
+      const d = Math.floor(diff / 86400000);
+      const h = Math.floor((diff % 86400000) / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+
+      const dEl = document.getElementById("cd-d-" + cardId);
+      const hEl = document.getElementById("cd-h-" + cardId);
+      const mEl = document.getElementById("cd-m-" + cardId);
+      const sEl = document.getElementById("cd-s-" + cardId);
+      if (dEl) dEl.textContent = String(d).padStart(2, "0");
+      if (hEl) hEl.textContent = String(h).padStart(2, "0");
+      if (mEl) mEl.textContent = String(m).padStart(2, "0");
+      if (sEl) sEl.textContent = String(s).padStart(2, "0");
+
+      setTimeout(tick, 1000);
+    }
+    tick();
+  }
+
+  // Load all titles in parallel
+  const titlesMap = {};
+  await Promise.all(activeCoupons.map(async c => {
+    titlesMap[c.slug] = await getCourseTitle(c.slug);
+  }));
+
+  const cards = activeCoupons.map((course, i) => {
+    const cardId  = "deal-" + i;
+    const title   = titlesMap[course.slug] || course.slug;
+    const link    = `course.html?course=${encodeURIComponent(course.slug)}`;
+    const udemyLink = course.udemy_url
+      ? course.udemy_url + "?couponCode=" + encodeURIComponent(course.coupon_code)
+      : link;
+
+    return `
+      <div class="deal-card">
+        <div>
+          <a href="${link}" style="color:var(--text);text-decoration:none;">
+            <div class="card-title">${title}</div>
+          </a>
+        </div>
+
+        <p class="text-sec" style="font-size:0.82rem;">العرض ينتهي خلال:</p>
+        ${buildCountdownHtml(course.coupon_expires, cardId)}
+
+        <div>
+          <p class="text-sec" style="font-size:0.82rem;margin-bottom:6px;">كود الخصم (انقر للنسخ):</p>
+          <div class="coupon-copy" onclick="copyCoupon('${cardId}', '${course.coupon_code}')">
+            <span class="code">${course.coupon_code}</span>
+            <button class="copy-btn" id="copy-btn-${cardId}" aria-label="نسخ الكود">نسخ</button>
+          </div>
+        </div>
+
+        <a href="${udemyLink}" target="_blank" rel="noopener" class="btn btn-gold">
+          🎉 احصل على الخصم الآن
+        </a>
+        <a href="${link}" class="btn btn-outline btn-sm" style="text-align:center;">عرض الكورس</a>
+      </div>`;
+  });
+
+  grid.innerHTML = cards.join("");
+
+  // Start all countdowns
+  activeCoupons.forEach((course, i) => {
+    startCountdown("deal-" + i, course.coupon_expires);
+  });
+
+  window.copyCoupon = function (cardId, code) {
+    navigator.clipboard.writeText(code).then(() => {
+      const btn = document.getElementById("copy-btn-" + cardId);
+      if (btn) {
+        btn.textContent = "تم النسخ!";
+        btn.classList.add("copied");
+        setTimeout(() => {
+          btn.textContent = "نسخ";
+          btn.classList.remove("copied");
+        }, 2000);
+      }
+    }).catch(() => {
+      // Fallback for older browsers
+      const el = document.createElement("textarea");
+      el.value = code;
+      el.style.position = "fixed";
+      el.style.opacity = "0";
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand("copy");
+      document.body.removeChild(el);
+      const btn = document.getElementById("copy-btn-" + cardId);
+      if (btn) {
+        btn.textContent = "تم النسخ!";
+        btn.classList.add("copied");
+        setTimeout(() => {
+          btn.textContent = "نسخ";
+          btn.classList.remove("copied");
+        }, 2000);
+      }
+    });
+  };
+})();
+</script>
+</body>
+</html>

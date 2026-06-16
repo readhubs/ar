@@ -1,53 +1,73 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="robots" content="index, follow">
-  <meta name="google-site-verification" content="pgigX05_bS7NIfxgAqbgPF1yhXFxfBwGxSSkj62HsC4" />
-  <title>الصحة النفسية | Readhubs</title>
-  <meta name="description" content="كورسات في الصحة النفسية وإدارة التوتر">
-  <link rel="canonical" href="https://readhubs.github.io/ar/niches/mental-health.html">
-  <link rel="stylesheet" href="../style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>كورسات الصحة النفسية — Readhubs</title>
+  <meta name="description" content="كورسات عربية متخصصة في الصحة النفسية والرفاهية العقلية وإدارة التوتر والقلق." />
+  <link rel="stylesheet" href="../style.css" />
+  <link rel="manifest" href="../manifest.json" />
+  <meta name="theme-color" content="#0F1B2D" />
 </head>
 <body>
-  <header class="site-header">
-    <a href="../index.html" class="logo">Readhubs</a>
-    <nav class="site-nav">
+<header class="site-header">
+  <div class="container">
+    <a class="logo" href="../index.html">Read<span>hubs</span></a>
+    <nav>
       <a href="money.html">المال</a>
       <a href="communication.html">التواصل</a>
-      <a href="mental-health.html">الصحة النفسية</a>
+      <a href="mental-health.html" class="active">الصحة النفسية</a>
       <a href="productivity.html">الإنتاجية</a>
-      <a href="career.html">المسيرة المهنية</a>
+      <a href="career.html">المسار المهني</a>
     </nav>
-  </header>
-  <main class="niche-page">
-    <div class="niche-hero">
-      <h1>الصحة النفسية</h1>
-      <p>كورسات في الصحة النفسية وإدارة التوتر</p>
-    </div>
-    <div id="courses-container" class="courses-grid"></div>
-    <div id="no-courses-msg" class="no-deals" style="display:none;">لا توجد كورسات في هذه الفئة بعد.</div>
-  </main>
-  <footer class="site-footer">
-    <span>&copy; 2026 Readhubs</span>
-    <a href="../about/index.html">من نحن</a>
-  </footer>
-  <script src="../courses-data.js"></script>
-  <script>
-    (function() {
-      if (typeof coursesData === "undefined") return;
-      var niche = "mental-health";
-      var courses = (coursesData.courses || []).filter(function(c) {
-        return c.niche === niche && c.status === "published";
-      });
-      var el = document.getElementById("courses-container");
-      var noEl = document.getElementById("no-courses-msg");
-      if (courses.length === 0) { el.style.display="none"; if(noEl) noEl.style.display="block"; return; }
-      courses.forEach(function(c) {
-        el.innerHTML += '<a href="../courses/' + c.id + '/index.html" class="course-card" style="display:block;"><img src="../' + (c.thumbnail||"") + '" alt="' + c.title_ar + '" onerror="this.style.display='none'"><div class="course-card-body"><h3>' + c.title_ar + '</h3></div></a>';
-      });
-    })();
-  </script>
+  </div>
+</header>
+<div class="container section">
+  <nav class="breadcrumb">
+    <a href="../index.html">الرئيسية</a>
+    <span>كورسات الصحة النفسية</span>
+  </nav>
+  <div class="hero" style="padding:40px 0 32px;">
+    <h1>🧠 كورسات الصحة النفسية</h1>
+    <p>رعاية صحتك النفسية ليست رفاهية — بل ضرورة. تعلم كيف تُدير مشاعرك وتعيش حياة متوازنة.</p>
+  </div>
+  <div class="cards-grid" id="niche-grid">
+    <div class="loading"><div class="spinner"></div><p>جارٍ التحميل…</p></div>
+  </div>
+</div>
+<footer class="site-footer">
+  <div class="container">
+    <p>© Readhubs — <a href="../index.html">الرئيسية</a> · <a href="../deals.html">العروض</a></p>
+  </div>
+</footer>
+<script src="../courses-data.js"></script>
+<script src="../floating-button.js"></script>
+<script>
+(async function () {
+  const NICHE = "mental-health";
+  const grid = document.getElementById("niche-grid");
+  const courses = (typeof coursesData !== "undefined" && Array.isArray(coursesData.courses))
+    ? coursesData.courses.filter(c => c.niche === NICHE && c.status === "published") : [];
+  if (courses.length === 0) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="icon">🧠</div><h3>لا توجد كورسات في هذا التخصص بعد</h3><p class="text-sec">يتم العمل على إضافة محتوى جديد قريباً.</p><a href="../index.html" class="btn btn-gold" style="margin-top:16px;">الرئيسية</a></div>`;
+    return;
+  }
+  const now = Date.now();
+  const cards = await Promise.all(courses.map(async c => {
+    let title = c.slug;
+    try {
+      const r = await fetch("../courses-raw/" + c.slug + ".txt");
+      if (r.ok) { const t = await r.text(); const m = t.match(/TITLE:\s*(.+)/i); if (m) title = m[1].trim(); }
+    } catch {}
+    const active = c.coupon_code && c.coupon_expires && new Date(c.coupon_expires).getTime() > now;
+    return `<a href="../course.html?course=${encodeURIComponent(c.slug)}" class="card" style="text-decoration:none;color:inherit;">
+      <div class="card-title">${title}</div>
+      ${active ? `<div class="coupon-badge" style="font-size:0.78rem;padding:3px 8px;">🏷️ ${c.coupon_code}</div>` : ""}
+      <div class="card-footer"><span class="btn btn-gold btn-sm" style="display:inline-block;">عرض الكورس →</span></div>
+    </a>`;
+  }));
+  grid.innerHTML = cards.join("");
+})();
+</script>
 </body>
 </html>

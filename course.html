@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>جارٍ التحميل… — Readhubs</title>
+  <meta name="description" content="" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#0F1B2D" />
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <a class="logo" href="index.html">Read<span>hubs</span></a>
+    <nav>
+      <a href="niches/money.html">المال</a>
+      <a href="niches/communication.html">التواصل</a>
+      <a href="niches/mental-health.html">الصحة النفسية</a>
+      <a href="niches/productivity.html">الإنتاجية</a>
+      <a href="niches/career.html">المسار المهني</a>
+    </nav>
+  </div>
+</header>
+
+<div id="noindex-banner" class="noindex-banner container mt-16" style="display:none;">
+  هذا الكورس قيد الإعداد ولن يظهر في نتائج البحث حتى يتم نشره.
+</div>
+
+<div class="container" id="course-container">
+  <div class="loading" style="padding:80px 20px;"><div class="spinner"></div><p>جارٍ تحميل الكورس…</p></div>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© Readhubs — <a href="index.html">الرئيسية</a> · <a href="deals.html">العروض</a></p>
+  </div>
+</footer>
+
+<script src="courses-data.js"></script>
+<script src="article-engine.js"></script>
+<script src="floating-button.js"></script>
+<script>
+(async function () {
+  "use strict";
+
+  const params    = new URLSearchParams(window.location.search);
+  const slug      = (params.get("course") || "").trim();
+  const container = document.getElementById("course-container");
+
+  function showError(msg, detail) {
+    container.innerHTML = `
+      <div class="error-state" style="margin:40px 0;">
+        <h3>⚠️ ${msg}</h3>
+        <p>${detail || ""}</p>
+        <a href="index.html" class="btn btn-outline btn-sm" style="margin-top:16px;">العودة للرئيسية</a>
+      </div>`;
+    document.title = "خطأ — Readhubs";
+  }
+
+  if (!slug) {
+    showError("لم يتم تحديد الكورس", "يرجى العودة للصفحة الرئيسية واختيار كورس.");
+    return;
+  }
+
+  // Find course record in courses-data.js
+  let courseRecord = null;
+  if (typeof coursesData !== "undefined" && Array.isArray(coursesData.courses)) {
+    courseRecord = coursesData.courses.find(c => c.slug === slug) || null;
+  }
+  if (!courseRecord) {
+    showError("الكورس غير موجود", "تأكد من إضافة الكورس في ملف courses-data.js.");
+    return;
+  }
+
+  // noindex for draft
+  if (courseRecord.status === "draft") {
+    const m = document.createElement("meta");
+    m.name = "robots"; m.content = "noindex,nofollow";
+    document.head.appendChild(m);
+    document.getElementById("noindex-banner").style.display = "block";
+  }
+
+  // Fetch txt
+  let rawText = "";
+  try {
+    const resp = await fetch("courses-raw/" + slug + ".txt");
+    if (!resp.ok) throw new Error("HTTP " + resp.status);
+    rawText = await resp.text();
+  } catch {
+    showError("تعذر تحميل المحتوى", "تأكد من رفع ملف الكورس بشكل صحيح في مجلد courses-raw/.");
+    return;
+  }
+
+  const parsed = parseCourseFile(rawText);
+  if (!parsed) {
+    showError("ملف الكورس تالف أو فارغ", "تأكد من أن ملف txt يتبع التنسيق المطلوب.");
+    return;
+  }
+
+  const ud = parsed.udemyData;
+
+  // Set page meta
+  document.title = ud.title + " — Readhubs";
+  const metaDesc = document.querySelector("meta[name='description']");
+  if (metaDesc) metaDesc.content = ud.description.substring(0, 160);
+
+  // Coupon logic
+  const now = Date.now();
+  const hasActiveCoupon = courseRecord.coupon_code &&
+    courseRecord.coupon_expires &&
+    new Date(courseRecord.coupon_expires).getTime() > now;
+
+  function ctaBlock() {
+    if (!courseRecord.udemy_url) return "";
+    const link = courseRecord.udemy_url +
+      (hasActiveCoupon ? "?couponCode=" + encodeURIComponent(courseRecord.coupon_code) : "");
+    return `
+      <div class="cta-box" style="margin:24px 0;">
+        ${hasActiveCoupon ? `
+          <div class="coupon-badge">🏷️ كود الخصم: ${courseRecord.coupon_code}</div>
+          <p style="margin:8px 0 4px;font-size:0.85rem;" class="text-sec">ينتهي: ${new Date(courseRecord.coupon_expires).toLocaleDateString("ar-SA")}</p>
+        ` : ""}
+        <h3 style="margin-bottom:12px;">${hasActiveCoupon ? "🎉 احصل على الكورس بسعر مخفوض" : "اشترِ الكورس على Udemy"}</h3>
+        <a href="${link}" target="_blank" rel="noopener" class="btn btn-gold">
+          ${hasActiveCoupon ? "احصل على الخصم الآن" : "اشترِ الآن"}
+        </a>
+      </div>`;
+  }
+
+  // Build outline HTML
+  let outlineHtml = "";
+  parsed.outline.parts.forEach(part => {
+    const partLectures = parsed.lectures.filter(l => l.part === part.number);
+    outlineHtml += `
+      <div class="outline-part">
+        <div class="outline-part-title">الجزء ${part.number}: ${part.title}</div>
+        <div class="outline-lectures">
+          ${partLectures.map(l =>
+            `<div class="outline-lecture">
+              <span class="text-gold" style="margin-left:8px;">${l.number}.</span>
+              ${l.title}
+              ${l.duration ? `<span class="text-sec" style="font-size:0.78rem;margin-right:8px;">(${l.duration})</span>` : ""}
+            </div>`
+          ).join("")}
+        </div>
+      </div>`;
+  });
+
+  // Build articles grid (200 articles)
+  const templateNames = ["ما هو؟","كيف تطبق؟","لماذا مهم؟","أخطاء شائعة","نصائح عملية","أمثلة واقعية","مقارنة","دليل كامل"];
+  const courseArticleNames = ["مقدمة الكورس","الجمهور المستهدف","النتائج الثمانية","أسئلة شائعة","دليل المبتدئ","كيف تبدأ اليوم؟","أبرز ما ستتعلمه","الفهرس الكامل"];
+
+  let articlesHtml = "";
+  // 192 lecture articles
+  for (let n = 1; n <= 192; n++) {
+    const lecIndex = Math.ceil(n / 8) - 1;
+    const tIndex   = ((n - 1) % 8);
+    const lec      = parsed.lectures[lecIndex];
+    const label    = lec ? lec.title + " — " + templateNames[tIndex] : "مقال " + n;
+    articlesHtml += `
+      <a class="article-link-btn" href="article.html?course=${encodeURIComponent(slug)}&article=${n}">
+        <span class="article-num">مقال ${n}</span>${label}
+      </a>`;
+  }
+  // 8 course-level articles
+  for (let i = 0; i < 8; i++) {
+    const n = 193 + i;
+    articlesHtml += `
+      <a class="article-link-btn" href="article.html?course=${encodeURIComponent(slug)}&article=${n}" style="border-color:var(--gold-dim);">
+        <span class="article-num" style="color:var(--text-sec);">مقال ${n}</span>${courseArticleNames[i]}
+      </a>`;
+  }
+
+  // Render
+  container.innerHTML = `
+    <nav class="breadcrumb" aria-label="مسار التنقل" style="margin-top:24px;">
+      <a href="index.html">الرئيسية</a>
+      <span>${ud.title}</span>
+    </nav>
+
+    <div class="course-header">
+      <h1>${ud.title}</h1>
+      <p style="color:var(--text-sec);margin:8px 0 16px;">${ud.description}</p>
+      ${ctaBlock()}
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:32px;" class="responsive-two-col">
+      <div>
+        <h2 class="section-title">لمن هذا الكورس؟</h2>
+        <p style="color:var(--text-sec);">${ud.audience}</p>
+        <h2 class="section-title" style="margin-top:24px;">المتطلبات</h2>
+        <p style="color:var(--text-sec);">${ud.requirements || "لا توجد متطلبات خاصة."}</p>
+      </div>
+      <div>
+        <h2 class="section-title">ما ستتعلمه</h2>
+        <ul class="outcomes-list">
+          ${ud.outcomes.map(o => `<li>${o}</li>`).join("")}
+        </ul>
+      </div>
+    </div>
+
+    <h2 class="section-title">محتوى الكورس</h2>
+    ${outlineHtml}
+
+    ${ctaBlock()}
+
+    <h2 class="section-title" style="margin-top:40px;">جميع المقالات (200 مقال)</h2>
+    <p style="color:var(--text-sec);margin-bottom:16px;">
+      كل محاضرة تولّد 8 مقالات بزوايا مختلفة، بالإضافة إلى 8 مقالات شاملة للكورس.
+    </p>
+    <div class="articles-grid">
+      ${articlesHtml}
+    </div>
+
+    ${ctaBlock()}`;
+
+  // Fix responsive two-col on mobile
+  const style = document.createElement("style");
+  style.textContent = "@media(max-width:768px){.responsive-two-col{grid-template-columns:1fr!important;}}";
+  document.head.appendChild(style);
+})();
+</script>
+</body>
+</html>
