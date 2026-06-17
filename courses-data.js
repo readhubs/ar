@@ -6,7 +6,7 @@
 const coursesData = {
   courses: [
     {
-      slug: "persuasion-influence-skills",
+      slug: "مهارات الإقناع والتأثير في الآخرين",
       niche: "communication",
       udemy_url: "",
       coupon_code: "",
