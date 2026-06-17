@@ -83,18 +83,6 @@
     );
   }
 
-  async function getCourseTitle(slug) {
-    try {
-      const resp = await fetch("courses-raw/" + slug + ".txt");
-      if (!resp.ok) return slug;
-      const text = await resp.text();
-      const m = text.match(/\[SECTION:UDEMY_DATA\][\s\S]*?TITLE:\s*(.+)/i);
-      return m ? m[1].trim() : slug;
-    } catch {
-      return slug;
-    }
-  }
-
   function buildCard(course, title) {
     const active = isActiveCoupon(course);
     return `
@@ -110,10 +98,21 @@
       </a>`;
   }
 
-  const courses = (typeof coursesData !== "undefined" && Array.isArray(coursesData.courses))
-    ? coursesData.courses : [];
+  // Load courses — primary source: courses-raw/index.json (auto-generated)
+  // Fallback: courses-data.js (JS registry)
+  let courses = [];
+  try {
+    const resp = await fetch("courses-raw/index.json");
+    if (resp.ok) {
+      const data = await resp.json();
+      courses = data.courses || [];
+    }
+  } catch {}
+  if (courses.length === 0 && typeof coursesData !== "undefined" && Array.isArray(coursesData.courses)) {
+    courses = coursesData.courses;
+  }
 
-  const published = courses.filter(c => c.status === "published");
+  const published = courses.filter(c => c.status !== "draft");
 
   // Load deals preview (top 3 active coupons)
   const dealsPreviewGrid = document.getElementById("deals-preview-grid");
@@ -127,11 +126,7 @@
         <p class="text-sec">تابعنا لمعرفة أحدث العروض والكوبونات.</p>
       </div>`;
   } else {
-    const cards = await Promise.all(dealCourses.map(async c => {
-      const title = await getCourseTitle(c.slug);
-      return buildCard(c, title);
-    }));
-    dealsPreviewGrid.innerHTML = cards.join("");
+    dealsPreviewGrid.innerHTML = dealCourses.map(c => buildCard(c, c.title || c.slug)).join("");
   }
 
   // Load all published courses
@@ -145,11 +140,7 @@
         <p class="text-sec">سيتم إضافة الكورسات قريباً. تابعنا!</p>
       </div>`;
   } else {
-    const cards = await Promise.all(published.map(async c => {
-      const title = await getCourseTitle(c.slug);
-      return buildCard(c, title);
-    }));
-    coursesGrid.innerHTML = cards.join("");
+    coursesGrid.innerHTML = published.map(c => buildCard(c, c.title || c.slug)).join("");
   }
 })();
 </script>

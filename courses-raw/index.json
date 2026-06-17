@@ -1,9 +1,4 @@
-/* courses-data.js
- * مُولَّد تلقائياً — لا تعدّل هذا الملف يدوياً.
- * لإضافة كورس جديد: ضع ملف .txt في courses-raw/ ثم شغّل:
- *   node build-courses.js
- */
-const coursesData = {
+{
   "courses": [
     {
       "slug": "persuasion-influence-skills",
@@ -17,6 +12,4 @@ const coursesData = {
       "added_date": "2026-06-17"
     }
   ]
-};
-
-if (typeof module !== "undefined") module.exports = coursesData;
+}

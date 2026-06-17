@@ -64,14 +64,18 @@
     return;
   }
 
-  // Find course record in courses-data.js
-  let courseRecord = null;
-  if (typeof coursesData !== "undefined" && Array.isArray(coursesData.courses)) {
-    courseRecord = coursesData.courses.find(c => c.slug === slug) || null;
-  }
-  if (!courseRecord) {
-    showError("الكورس غير موجود", "تأكد من إضافة الكورس في ملف courses-data.js.");
-    return;
+  // Look up optional metadata (coupon, udemy_url, niche…) — not required to render
+  let courseRecord = {};
+  try {
+    const idxResp = await fetch("courses-raw/index.json");
+    if (idxResp.ok) {
+      const idx = await idxResp.json();
+      courseRecord = (idx.courses || []).find(c => c.slug === slug) || {};
+    }
+  } catch {}
+  // Fallback to courses-data.js
+  if (!courseRecord.slug && typeof coursesData !== "undefined" && Array.isArray(coursesData.courses)) {
+    courseRecord = coursesData.courses.find(c => c.slug === slug) || {};
   }
 
   // noindex for draft
