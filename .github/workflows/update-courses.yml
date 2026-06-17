@@ -1,0 +1,36 @@
+name: Update Course Index
+
+on:
+  push:
+    paths:
+      - 'courses-raw/*.txt'
+      - 'courses-raw/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-index:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Generate course index
+        run: node build-courses.js
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add courses-raw/index.json courses-data.js
+          git diff --staged --quiet || (git commit -m "bot: auto-update course index [skip ci]" && git push)

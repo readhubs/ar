@@ -40,14 +40,128 @@
  */
 
 /* ─────────────────────────────────────────────────────────
-   PARSER  —  handles actual DeepSeek-generated txt format
+   PARSER (OLD FORMAT)  —  [SECTION:UDEMY_DATA] / [LECTURE:N]
+   ───────────────────────────────────────────────────────── */
+
+function parseCourseFileOld(text) {
+  try {
+    function getSection(name) {
+      const open  = `[SECTION:${name}]`;
+      const close = `[/SECTION:${name}]`;
+      const s = text.indexOf(open);
+      const e = text.indexOf(close);
+      if (s === -1) return "";
+      return text.substring(s + open.length, e === -1 ? text.length : e);
+    }
+
+    /* ── UDEMY DATA ── */
+    const udSec = getSection("UDEMY_DATA");
+
+    function fieldVal(sec, key) {
+      const m = sec.match(new RegExp(`${key}:\\s*(.+)`));
+      return m ? m[1].trim() : "";
+    }
+    function fieldBullets(sec, key) {
+      const idx = sec.indexOf(key + ":");
+      if (idx === -1) return [];
+      const after = sec.substring(idx + key.length + 1);
+      return after.split("\n")
+        .map(l => l.replace(/^[\s\-*•]+/, "").trim())
+        .filter(l => l.length > 3 && !l.includes("[/SECTION") && !l.startsWith("["));
+    }
+
+    const udemyData = {
+      title:        fieldVal(udSec, "العنوان_المحسّن"),
+      description:  fieldVal(udSec, "الوصف"),
+      keywords:     fieldVal(udSec, "الكلمات_المفتاحية"),
+      audience:     fieldVal(udSec, "الجمهور"),
+      requirements: fieldVal(udSec, "المتطلبات"),
+      outcomes:     fieldBullets(udSec, "مخرجات_التعلم")
+    };
+    if (!udemyData.title) return null;
+
+    /* ── OUTLINE ── */
+    const outlineSec = getSection("OUTLINE");
+    const parts = [];
+    const partRe = /\[PART:(\d+)\]\[PART_TITLE:(.+?)\]([\s\S]*?)(?=\[PART:\d+\]|\[\/SECTION|$)/g;
+    let pm;
+    while ((pm = partRe.exec(outlineSec)) !== null) {
+      const lectureNums = [];
+      const lRe = /\[L:(\d+)\]/g;
+      let lm;
+      while ((lm = lRe.exec(pm[3])) !== null) lectureNums.push(parseInt(lm[1], 10));
+      parts.push({ number: parseInt(pm[1], 10), title: pm[2].trim(), lectureNumbers: lectureNums });
+    }
+
+    /* ── LECTURES ── */
+    const lecSec = getSection("LECTURES");
+    const lecRe = /\[LECTURE:(\d+)\]\[TITLE:(.+?)\](?:\[DURATION:(\d+)\])?\[PART:(\d+)\]/g;
+    const lecMatches = [...lecSec.matchAll(lecRe)];
+    const lectures = [];
+
+    for (let i = 0; i < lecMatches.length; i++) {
+      const lm    = lecMatches[i];
+      const num   = parseInt(lm[1], 10);
+      const lTitle = lm[2].trim();
+      const dur   = lm[3] ? lm[3] + " دقيقة" : "";
+      const pNum  = parseInt(lm[4], 10);
+      const bStart = lm.index;
+      const bEnd   = i + 1 < lecMatches.length ? lecMatches[i + 1].index : lecSec.length;
+      const block  = lecSec.substring(bStart, bEnd);
+
+      /* Script */
+      const ss = block.indexOf("[SCRIPT:START]");
+      const se = block.indexOf("[SCRIPT:END]");
+      const script = (ss !== -1 && se !== -1)
+        ? block.substring(ss + "[SCRIPT:START]".length, se).trim()
+        : "";
+
+      /* Slides */
+      const slides   = [];
+      const slidesS  = block.indexOf("[SLIDES:START]");
+      const slidesE  = block.indexOf("[SLIDES:END]");
+      if (slidesS !== -1) {
+        const sb  = block.substring(slidesS, slidesE === -1 ? block.length : slidesE);
+        const sRe = /\[SLIDE:(\d+)\]([\s\S]*?)\[\/SLIDE:\d+\]/g;
+        let sm;
+        while ((sm = sRe.exec(sb)) !== null) {
+          const tM   = sm[2].match(/\[SLIDE_TITLE:(.+?)\]/);
+          const bArr = [];
+          const bRe  = /\[BULLET\]([\s\S]*?)\[\/BULLET\]/g;
+          let bm;
+          while ((bm = bRe.exec(sm[2])) !== null) bArr.push(bm[1].trim());
+          slides.push({ number: parseInt(sm[1], 10), title: tM ? tM[1].trim() : "", bullets: bArr });
+        }
+      }
+
+      const part = parts.find(p => p.number === pNum);
+      lectures.push({ number: num, title: lTitle, duration: dur,
+        part: pNum, partTitle: part ? part.title : "",
+        script, slides, exercise: null });
+    }
+
+    return { udemyData, outline: { parts }, lectures };
+  } catch (err) {
+    console.error("parseCourseFileOld error:", err);
+    return null;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────
+   PARSER (NEW FORMAT)  —  DeepSeek ## أولاً / ## ثانياً
    ───────────────────────────────────────────────────────── */
 
 function parseCourseFile(rawText) {
   if (!rawText || rawText.trim().length === 0) return null;
 
+  /* Route to old-format parser when the file uses [SECTION:...] markers */
+  const normalised = rawText.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+  if (normalised.includes("[SECTION:UDEMY_DATA]")) {
+    return parseCourseFileOld(normalised);
+  }
+
   try {
-    const text = rawText.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+    const text = normalised;
 
     /* ── Locate the four main section headers ── */
     function secPos(arabicOrdinal) {

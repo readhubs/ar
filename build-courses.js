@@ -27,10 +27,13 @@ try {
 
 /* ─── 2. دوال مساعدة لاستخراج الحقول من ملف txt ─── */
 function extractTitle(content) {
-  // Try "# كورس: ..." header at the very top
+  // Old format: العنوان_المحسّن: title  (inside [SECTION:UDEMY_DATA])
+  const old = content.match(/العنوان_المحسّن:\s*(.+)/);
+  if (old) return old[1].trim();
+  // New format: # كورس: title  (top-level header)
   const h = content.match(/^#\s*كورس[:：]\s*(.+)/m);
   if (h) return h[1].trim();
-  // Try bold SEO title field
+  // Bold SEO title field
   const seo = content.match(/\*\*العنوان المحسّن[^*]*\*\*\s*\n([^\n*]+)/);
   if (seo) return seo[1].trim();
   // Generic bold title field
