@@ -184,21 +184,33 @@
 
   // Build CTA box
   const now = Date.now();
-  let ctaHtml = "";
   const hasActiveCoupon = courseRecord.coupon_code &&
     courseRecord.coupon_expires &&
     new Date(courseRecord.coupon_expires).getTime() > now;
 
-  if (courseRecord.udemy_url) {
-    ctaHtml = `
-      <div class="cta-box">
-        <h3>اشترِ الكورس الكامل على Udemy</h3>
-        <p>${courseTitle}</p>
-        ${hasActiveCoupon ? `<div class="coupon-badge">كود الخصم: ${courseRecord.coupon_code}</div><br>` : ""}
-        <a href="${courseRecord.udemy_url}${hasActiveCoupon ? '?couponCode=' + encodeURIComponent(courseRecord.coupon_code) : ''}"
-           target="_blank" rel="noopener" class="btn btn-gold">
-          ${hasActiveCoupon ? "🎉 احصل على الخصم الآن" : "اشترِ الآن على Udemy"}
-        </a>
+  const udemyLink = courseRecord.udemy_url
+    ? courseRecord.udemy_url + (hasActiveCoupon ? "?couponCode=" + encodeURIComponent(courseRecord.coupon_code) : "")
+    : null;
+
+  function ctaBox(heading) {
+    return `
+      <div class="cta-box" style="margin:28px 0;">
+        ${hasActiveCoupon
+          ? `<div class="coupon-badge" style="margin-bottom:8px;">🏷️ كود الخصم: ${courseRecord.coupon_code}
+               <span style="font-size:0.78rem;margin-right:8px;opacity:0.75;">
+                 (ينتهي: ${new Date(courseRecord.coupon_expires).toLocaleDateString("ar-SA")})
+               </span>
+             </div>` : ""}
+        <h3 style="margin:0 0 6px;">${heading || (hasActiveCoupon ? "🎉 احصل على الكورس بسعر مخفوض" : "اشترِ الكورس الكامل على Udemy")}</h3>
+        <p style="color:var(--text-sec);margin:0 0 14px;font-size:0.92rem;">
+          <a href="course.html?course=${encodeURIComponent(slug)}" style="color:var(--gold);">${courseTitle}</a>
+        </p>
+        ${udemyLink
+          ? `<a href="${udemyLink}" target="_blank" rel="noopener" class="btn btn-gold" style="font-size:1.05rem;padding:12px 32px;">
+               ${hasActiveCoupon ? "🎉 احصل على الخصم الآن" : "اشترِ الآن على Udemy ←"}
+             </a>`
+          : `<span class="btn btn-gold" style="opacity:0.55;cursor:default;padding:12px 32px;">اشترِ على Udemy ←</span>`
+        }
       </div>`;
   }
 
@@ -208,11 +220,12 @@
     <article>
       <h1>${article.title}</h1>
       <div class="article-meta">كورس: <a href="course.html?course=${encodeURIComponent(slug)}">${courseTitle}</a> · مقال ${artNum} من 200</div>
-      ${ctaHtml}
+      ${ctaBox("اشترِ الكورس الكامل وتعلّم أكثر")}
       <div class="article-body">${article.body}</div>
+      ${ctaBox("هل أعجبك المحتوى؟ احصل على الكورس كاملاً")}
     </article>
     ${relatedHtml}
-    ${ctaHtml}
+    ${ctaBox("تعلّم المزيد — اشترِ الكورس على Udemy")}
     <div style="margin-top:24px;">
       <a href="course.html?course=${encodeURIComponent(slug)}" class="btn btn-outline btn-sm">← عودة للكورس</a>
     </div>`;

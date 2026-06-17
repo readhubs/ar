@@ -116,20 +116,24 @@
     courseRecord.coupon_expires &&
     new Date(courseRecord.coupon_expires).getTime() > now;
 
-  function ctaBlock() {
-    if (!courseRecord.udemy_url) return "";
-    const link = courseRecord.udemy_url +
-      (hasActiveCoupon ? "?couponCode=" + encodeURIComponent(courseRecord.coupon_code) : "");
+  function ctaBlock(label) {
+    const link = courseRecord.udemy_url
+      ? courseRecord.udemy_url + (hasActiveCoupon ? "?couponCode=" + encodeURIComponent(courseRecord.coupon_code) : "")
+      : null;
     return `
       <div class="cta-box" style="margin:24px 0;">
         ${hasActiveCoupon ? `
           <div class="coupon-badge">🏷️ كود الخصم: ${courseRecord.coupon_code}</div>
           <p style="margin:8px 0 4px;font-size:0.85rem;" class="text-sec">ينتهي: ${new Date(courseRecord.coupon_expires).toLocaleDateString("ar-SA")}</p>
         ` : ""}
-        <h3 style="margin-bottom:12px;">${hasActiveCoupon ? "🎉 احصل على الكورس بسعر مخفوض" : "اشترِ الكورس على Udemy"}</h3>
-        <a href="${link}" target="_blank" rel="noopener" class="btn btn-gold">
-          ${hasActiveCoupon ? "احصل على الخصم الآن" : "اشترِ الآن"}
-        </a>
+        <h3 style="margin-bottom:12px;">${label || (hasActiveCoupon ? "🎉 احصل على الكورس بسعر مخفوض" : "اشترِ الكورس الآن على Udemy")}</h3>
+        <p style="color:var(--text-sec);margin:0 0 14px;font-size:0.95rem;">${ud.title}</p>
+        ${link
+          ? `<a href="${link}" target="_blank" rel="noopener" class="btn btn-gold" style="font-size:1.05rem;padding:12px 28px;">
+               ${hasActiveCoupon ? "🎉 احصل على الخصم الآن" : "اشترِ الآن على Udemy ←"}
+             </a>`
+          : `<span class="btn btn-gold" style="opacity:0.6;cursor:default;font-size:1.05rem;padding:12px 28px;">اشترِ على Udemy ←</span>`
+        }
       </div>`;
   }
 
