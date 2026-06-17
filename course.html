@@ -86,10 +86,11 @@
     document.getElementById("noindex-banner").style.display = "block";
   }
 
-  // Fetch txt
+  // Fetch txt — use _srcFile (original filename) if available, else fall back to slug
+  const txtFile = courseRecord._srcFile || slug;
   let rawText = "";
   try {
-    const resp = await fetch("courses-raw/" + slug + ".txt");
+    const resp = await fetch("courses-raw/" + encodeURIComponent(txtFile) + ".txt");
     if (!resp.ok) throw new Error("HTTP " + resp.status);
     rawText = await resp.text();
   } catch {

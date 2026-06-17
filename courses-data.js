@@ -7,6 +7,7 @@ const coursesData = {
   "courses": [
     {
       "slug": "persuasion-influence-skills",
+      "_srcFile": "persuasion-influence-skills",
       "title": "مهارات الإقناع والتأثير في الآخرين",
       "niche": "communication",
       "udemy_url": "",
@@ -17,7 +18,8 @@ const coursesData = {
       "added_date": "2026-06-17"
     },
     {
-      "slug": "الذهب والفضة كاستثمار دليل المستثمر العربي العملي",
+      "slug": "aldhhb-walfda-kastthmar-dlyl-almstthmr-alarby-alamly",
+      "_srcFile": "الذهب والفضة كاستثمار دليل المستثمر العربي العملي",
       "title": "الذهب والفضة كاستثمار: دليل المستثمر العربي العملي",
       "niche": "money",
       "udemy_url": "",
@@ -28,7 +30,8 @@ const coursesData = {
       "added_date": "2026-06-17"
     },
     {
-      "slug": "مهارات الإقناع والتأثير في الآخرين1",
+      "slug": "mharat-alaqnaa-waltathyr-fy-alakhryn1",
+      "_srcFile": "مهارات الإقناع والتأثير في الآخرين1",
       "title": "مهارات الإقناع والتأثير في الآخرين",
       "niche": "communication",
       "udemy_url": "",

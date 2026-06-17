@@ -18,11 +18,45 @@ const RAW_DIR = path.join(__dirname, "courses-raw");
 const INDEX   = path.join(RAW_DIR,   "index.json");
 const DATA_JS = path.join(__dirname, "courses-data.js");
 
+/* ─── 0. تحويل اسم الملف إلى slug آمن للـ URL ─── */
+function toSlug(filename) {
+  // Remove .txt extension
+  let s = filename.replace(/\.txt$/, "");
+
+  // If already ASCII-safe (no spaces, no Arabic), keep as-is
+  if (/^[a-zA-Z0-9_-]+$/.test(s)) return s;
+
+  // Transliterate common Arabic letters to Latin equivalents
+  const arMap = {
+    'ا':'a','أ':'a','إ':'a','آ':'a','ب':'b','ت':'t','ث':'th','ج':'j','ح':'h','خ':'kh',
+    'د':'d','ذ':'dh','ر':'r','ز':'z','س':'s','ش':'sh','ص':'s','ض':'d','ط':'t','ظ':'z',
+    'ع':'a','غ':'gh','ف':'f','ق':'q','ك':'k','ل':'l','م':'m','ن':'n','ه':'h','و':'w',
+    'ي':'y','ى':'a','ة':'a','ء':'','ئ':'y','ؤ':'w','لا':'la',
+  };
+  let result = "";
+  for (const ch of s) {
+    result += arMap[ch] !== undefined ? arMap[ch] : ch;
+  }
+  // Replace spaces and underscores with hyphens, strip non-alphanumeric
+  result = result
+    .replace(/[\s_]+/g, "-")
+    .replace(/[^a-zA-Z0-9\u0621-\u064A-]/g, "")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "")
+    .toLowerCase();
+
+  return result || s.replace(/\s+/g, "-").substring(0, 60);
+}
+
 /* ─── 1. احتفظ بالبيانات اليدوية الموجودة (رابط Udemy، الكوبون، إلخ) ─── */
+// Index by both slug AND original filename (for migration)
 let saved = {};
 try {
   const existing = JSON.parse(fs.readFileSync(INDEX, "utf8"));
-  (existing.courses || []).forEach(c => { saved[c.slug] = c; });
+  (existing.courses || []).forEach(c => {
+    saved[c.slug] = c;
+    if (c._srcFile) saved[c._srcFile] = c;
+  });
 } catch { /* أول تشغيل */ }
 
 /* ─── 2. دوال مساعدة لاستخراج الحقول من ملف txt ─── */
@@ -65,13 +99,17 @@ if (files.length === 0) {
 }
 
 const courses = files.map(file => {
-  const slug    = file.replace(/\.txt$/, "");
+  const slug    = toSlug(file);
+  const srcFile = file.replace(/\.txt$/, "");  // original filename without extension
   const content = fs.readFileSync(path.join(RAW_DIR, file), "utf8");
-  const title   = extractTitle(content) || slug;
-  const old     = saved[slug] || {};
+  const title   = extractTitle(content) || srcFile;
+
+  // Lookup saved data by slug first, then by original filename
+  const old = saved[slug] || saved[srcFile] || {};
 
   return {
     slug,
+    _srcFile: srcFile,          // original filename (used to load the .txt at runtime)
     title,
     niche:          (old.niche && old.niche !== "general") ? old.niche : guessNiche(title),
     udemy_url:      old.udemy_url      || "",
